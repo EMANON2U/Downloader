@@ -1,0 +1,38 @@
+Downloader - componentes de terceiros
+=====================================
+
+O Downloader inclui os programas abaixo, sem modificação. Eles são extraídos
+para %LOCALAPPDATA%\Downloader\bin e executados como processos separados.
+
+yt-dlp {{YTDLP_VERSION}}
+  Licença: The Unlicense (domínio público)
+  Site e código-fonte: https://github.com/yt-dlp/yt-dlp
+  Observação: o Downloader atualiza o yt-dlp automaticamente com "yt-dlp -U".
+
+FFmpeg {{FFMPEG_VERSION}}
+  Build: BtbN/FFmpeg-Builds, variante win64-lgpl (estática)
+  Licença: GNU Lesser General Public License v3 (texto completo no fim deste arquivo)
+  Código-fonte do FFmpeg: https://ffmpeg.org/download.html  (tag correspondente à versão acima)
+  Scripts de build e bibliotecas usadas: https://github.com/BtbN/FFmpeg-Builds
+  Você pode substituir o ffmpeg.exe da pasta bin por outra versão compatível;
+  o Downloader só restaura o original se o arquivo for apagado ou alterado.
+
+Deno {{DENO_VERSION}}
+  Licença: MIT
+  Copyright 2018-2026 the Deno authors
+  Site e código-fonte: https://github.com/denoland/deno
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions: The above copyright notice and this
+  permission notice shall be included in all copies or substantial portions of the
+  Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
+
+Uso responsável: baixe apenas conteúdo que você tem direito de usar. Os termos de
+alguns sites proíbem o download.
+
+-------------------------------------------------------------------------------
+FFmpeg - GNU LESSER GENERAL PUBLIC LICENSE v3
+-------------------------------------------------------------------------------

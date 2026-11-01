@@ -1,0 +1,1291 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:app="clr-namespace:Downloader;assembly=Downloader"
+        Title="Downloader" Width="1240" Height="800" MinWidth="720" MinHeight="540"
+        WindowStartupLocation="CenterScreen" Background="{DynamicResource Canvas}"
+        FontFamily="Segoe UI Variable Text, Segoe UI" FontSize="14" Foreground="{DynamicResource Text}"
+        TextOptions.TextFormattingMode="Display" UseLayoutRounding="True">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="40" ResizeBorderThickness="6" GlassFrameThickness="0,0,0,1" CornerRadius="0" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="B2V"/>
+        <app:ThumbConverter x:Key="ThumbConv"/>
+        <DropShadowEffect x:Key="MenuShadow" BlurRadius="18" ShadowDepth="3" Direction="270" Opacity="0.2" Color="#000000"/>
+
+        <Geometry x:Key="IcDownload">M12 4V15 M7 11L12 16L17 11 M5 20H19</Geometry>
+        <Geometry x:Key="IcLibrary">M6 4H18A2 2 0 0 1 20 6V18A2 2 0 0 1 18 20H6A2 2 0 0 1 4 18V6A2 2 0 0 1 6 4Z M10 9L15 12L10 15Z</Geometry>
+        <Geometry x:Key="IcHelp">M12 3A9 9 0 1 0 12 21A9 9 0 1 0 12 3Z M9.5 9.5A2.5 2.5 0 1 1 13 11.8C12.3 12.1 12 12.6 12 13.5 M12 17V17.01</Geometry>
+        <Geometry x:Key="IcSparkle">M12 4L13.8 9.2L19 11L13.8 12.8L12 18L10.2 12.8L5 11L10.2 9.2Z M19 17V21 M17 19H21</Geometry>
+        <Geometry x:Key="IcFolder">M3 7A2 2 0 0 1 5 5H9L11 7H19A2 2 0 0 1 21 9V17A2 2 0 0 1 19 19H5A2 2 0 0 1 3 17Z</Geometry>
+        <Geometry x:Key="IcLink">M10 14A4 4 0 0 0 15.7 14L18.7 11A4 4 0 0 0 13 5.3L11.5 6.8 M14 10A4 4 0 0 0 8.3 10L5.3 13A4 4 0 0 0 11 18.7L12.5 17.2</Geometry>
+        <Geometry x:Key="IcPaste">M9 3H15V6H9Z M9 4.5H7A2 2 0 0 0 5 6.5V19A2 2 0 0 0 7 21H17A2 2 0 0 0 19 19V6.5A2 2 0 0 0 17 4.5H15</Geometry>
+        <Geometry x:Key="IcVideo">M5 6H13A2 2 0 0 1 15 8V16A2 2 0 0 1 13 18H5A2 2 0 0 1 3 16V8A2 2 0 0 1 5 6Z M15 10.5L21 7V17L15 13.5</Geometry>
+        <Geometry x:Key="IcMusic">M9 18V6L20 4V16 M9 18A2.5 2.5 0 1 1 4 18A2.5 2.5 0 1 1 9 18Z M20 16A2.5 2.5 0 1 1 15 16A2.5 2.5 0 1 1 20 16Z</Geometry>
+        <Geometry x:Key="IcSplit">M5 4H12A2 2 0 0 1 14 6V10A2 2 0 0 1 12 12H5A2 2 0 0 1 3 10V6A2 2 0 0 1 5 4Z M14 7L18 5V11L14 9 M11 20V16L20 14.5V18.5 M11 20A1.8 1.8 0 1 1 7.4 20A1.8 1.8 0 1 1 11 20Z M20 18.5A1.8 1.8 0 1 1 16.4 18.5A1.8 1.8 0 1 1 20 18.5Z</Geometry>
+        <Geometry x:Key="IcQuality">M4 7H20 M4 17H20 M9 4V10 M15 14V20</Geometry>
+        <Geometry x:Key="IcFile">M7 3H14L19 8V19A2 2 0 0 1 17 21H7A2 2 0 0 1 5 19V5A2 2 0 0 1 7 3Z M14 3V8H19</Geometry>
+        <Geometry x:Key="IcScissors">M8.3 8L20 18 M8.3 16L20 6 M8.5 6A2.5 2.5 0 1 1 3.5 6A2.5 2.5 0 1 1 8.5 6Z M8.5 18A2.5 2.5 0 1 1 3.5 18A2.5 2.5 0 1 1 8.5 18Z</Geometry>
+        <Geometry x:Key="IcLock">M7 11H17A1.5 1.5 0 0 1 18.5 12.5V19A1.5 1.5 0 0 1 17 20.5H7A1.5 1.5 0 0 1 5.5 19V12.5A1.5 1.5 0 0 1 7 11Z M8.5 11V7.5A3.5 3.5 0 0 1 15.5 7.5V11</Geometry>
+        <Geometry x:Key="IcPause">M9 5V19 M15 5V19</Geometry>
+        <Geometry x:Key="IcPlay">M8 5L19 12L8 19Z</Geometry>
+        <Geometry x:Key="IcClose">M6 6L18 18 M18 6L6 18</Geometry>
+        <Geometry x:Key="IcRetry">M20 12A8 8 0 1 1 17.7 6.4 M20 3.5V7.5H16</Geometry>
+        <Geometry x:Key="IcClear">M4 7H20 M10 7V4H14V7 M6.5 7L7.5 20H16.5L17.5 7</Geometry>
+        <Geometry x:Key="IcSearch">M11 4A7 7 0 1 0 11 18A7 7 0 1 0 11 4Z M16.2 16.2L20 20</Geometry>
+        <Geometry x:Key="IcBack">M15 5L8 12L15 19</Geometry>
+        <Geometry x:Key="IcSun">M12 8A4 4 0 1 0 12 16A4 4 0 1 0 12 8Z M12 3V5 M12 19V21 M3 12H5 M19 12H21 M5.6 5.6L7 7 M17 17L18.4 18.4 M5.6 18.4L7 17 M17 7L18.4 5.6</Geometry>
+        <Geometry x:Key="IcMoon">M20 14.5A8.5 8.5 0 1 1 9.5 4A7 7 0 0 0 20 14.5Z</Geometry>
+        <Geometry x:Key="IcMonitor">M5 4H19A2 2 0 0 1 21 6V15A2 2 0 0 1 19 17H5A2 2 0 0 1 3 15V6A2 2 0 0 1 5 4Z M9 21H15 M12 17V21</Geometry>
+        <Geometry x:Key="IcShield">M12 3L19 6V11C19 16 16 19.5 12 21C8 19.5 5 16 5 11V6Z M9 12L11.2 14.2L15 10</Geometry>
+        <Geometry x:Key="IcInfo">M12 3A9 9 0 1 0 12 21A9 9 0 1 0 12 3Z M12 11V16.5 M12 7.5V7.51</Geometry>
+        <Geometry x:Key="IcEdit">M4 20H8L19 9A2.1 2.1 0 0 0 16 6L5 17Z M14.5 7.5L17.5 10.5</Geometry>
+        <Geometry x:Key="IcMinimize">M6.5 12H17.5</Geometry>
+        <Geometry x:Key="IcMaximize">M7 7H17V17H7Z</Geometry>
+        <Geometry x:Key="IcRestore">M7 9.5H14.5V17H7Z M9.5 9.5V7H17V14.5H14.5</Geometry>
+
+        <Style x:Key="Ic" TargetType="Path">
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Stretch" Value="None"/>
+            <Setter Property="StrokeThickness" Value="2"/>
+            <Setter Property="StrokeLineJoin" Value="Round"/>
+            <Setter Property="StrokeStartLineCap" Value="Round"/>
+            <Setter Property="StrokeEndLineCap" Value="Round"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Stroke" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Control}}"/>
+            <Setter Property="LayoutTransform"><Setter.Value><ScaleTransform ScaleX="0.75" ScaleY="0.75"/></Setter.Value></Setter>
+        </Style>
+        <Style x:Key="IcSmall" TargetType="Path" BasedOn="{StaticResource Ic}">
+            <Setter Property="LayoutTransform"><Setter.Value><ScaleTransform ScaleX="0.625" ScaleY="0.625"/></Setter.Value></Setter>
+        </Style>
+
+        <Style x:Key="KeyFocus">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Rectangle Stroke="{DynamicResource Accent}" StrokeThickness="2" RadiusX="9" RadiusY="9" Margin="-1"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ToolTip">
+            <Setter Property="HasDropShadow" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToolTip">
+                        <Border Background="{DynamicResource Elevated}" BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="7" Padding="9,5" Margin="4,4,10,10" Effect="{StaticResource MenuShadow}">
+                            <TextBlock Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}" Foreground="{DynamicResource Text}" FontSize="12" MaxWidth="320" TextWrapping="Wrap"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ScrollBar">
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="MinWidth" Value="10"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Track x:Name="PART_Track" IsDirectionReversed="True">
+                            <Track.Thumb>
+                                <Thumb>
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Border Background="Transparent" Padding="3,0">
+                                                <Border x:Name="Bar" Background="{DynamicResource ScrollThumb}" CornerRadius="2"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bar" Property="Background" Value="{DynamicResource Faint}"/></Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+                        </Track>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="Field" TargetType="TextBox">
+            <Setter Property="Background" Value="{DynamicResource FieldBg}"/>
+            <Setter Property="Foreground" Value="{DynamicResource Text}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource Text}"/>
+            <Setter Property="SelectionBrush" Value="{DynamicResource Accent}"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="Transparent" BorderThickness="2" CornerRadius="12">
+                            <Grid>
+                                <TextBlock x:Name="Hint" Text="{TemplateBinding Tag}" Padding="{TemplateBinding Padding}" Margin="2,0,0,0"
+                                           Foreground="{DynamicResource Muted}" IsHitTestVisible="False" Visibility="Collapsed"/>
+                                <ScrollViewer x:Name="PART_ContentHost" VerticalScrollBarVisibility="Auto"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource FieldHover}"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Accent}"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Canvas}"/>
+                            </Trigger>
+                            <Trigger Property="Text" Value="">
+                                <Setter TargetName="Hint" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PrimaryBtn" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource OnAccent}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="ToolTipService.ShowOnDisabled" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{DynamicResource Primary}" BorderBrush="Transparent" BorderThickness="2" CornerRadius="12" Padding="20,7">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource PrimaryHover}"/></Trigger>
+                            <Trigger Property="IsPressed" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource PrimaryPress}"/></Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentSoftText}"/></Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Disabled}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource DisabledText}"/>
+                                <Setter Property="Cursor" Value="Arrow"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="Link" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource LinkText}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="Transparent" BorderBrush="Transparent" BorderThickness="0,0,0,1" Padding="0,1">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource LinkText}"/></Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource LinkText}"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TitleLink" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource Text}"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <TextBlock x:Name="T" Background="Transparent" Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}" TextTrimming="CharacterEllipsis"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="T" Property="TextDecorations" Value="Underline"/>
+                                <Setter TargetName="T" Property="Foreground" Value="{DynamicResource LinkText}"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="T" Property="TextDecorations" Value="Underline"/>
+                                <Setter TargetName="T" Property="Foreground" Value="{DynamicResource LinkText}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="IconBtn" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource Muted}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{StaticResource KeyFocus}"/>
+            <Setter Property="ToolTipService.ShowOnDisabled" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="Transparent" BorderBrush="Transparent" BorderThickness="1.5" CornerRadius="8" Width="32" Height="32">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Hover}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource Text}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.4"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CaptionBtn" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource Text}"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="Transparent" Width="46" Height="32">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource Hover}"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="CaptionClose" TargetType="Button" BasedOn="{StaticResource CaptionBtn}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="Transparent" Width="46" Height="32">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#C42B1C"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="Pill" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource LinkText}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{DynamicResource ChipBg}" BorderBrush="Transparent" BorderThickness="1" CornerRadius="12" Padding="12,3">
+                            <ContentPresenter HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource ChipHover}"/></Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Accent}"/></Trigger>
+                            <Trigger Property="IsEnabled" Value="False"><Setter Property="Foreground" Value="{DynamicResource Good}"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="Bare" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <ContentPresenter x:Name="Cp"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Cp" Property="Opacity" Value="0.85"/></Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Cp" Property="Opacity" Value="0.75"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="Nav" TargetType="RadioButton">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="{DynamicResource Text}"/>
+            <Setter Property="FocusVisualStyle" Value="{StaticResource KeyFocus}"/>
+            <Setter Property="Margin" Value="0,0,0,2"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Bg" Background="Transparent" BorderBrush="Transparent" BorderThickness="1.5" CornerRadius="9" Height="36" Padding="11,0">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="{DynamicResource Hover}"/></Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{DynamicResource NavSelected}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource Accent}"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="NavSmall" TargetType="RadioButton">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="{DynamicResource Muted}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FocusVisualStyle" Value="{StaticResource KeyFocus}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Bg" Background="Transparent" BorderBrush="Transparent" BorderThickness="1.5" CornerRadius="7" Height="28" Padding="12,0">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Hover}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource Text}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{DynamicResource NavSelected}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource Accent}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DocIndexItem" TargetType="RadioButton">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="{DynamicResource Text}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FocusVisualStyle" Value="{StaticResource KeyFocus}"/>
+            <Setter Property="GroupName" Value="DocIndex"/>
+            <Setter Property="Margin" Value="0,0,0,1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Bg" Background="Transparent" BorderBrush="Transparent" BorderThickness="1.5" CornerRadius="7" Padding="9,5">
+                            <TextBlock Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}" TextWrapping="Wrap"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="{DynamicResource Hover}"/></Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{DynamicResource NavSelected}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource Accent}"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ThemeSeg" TargetType="RadioButton">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="{DynamicResource Muted}"/>
+            <Setter Property="FocusVisualStyle" Value="{StaticResource KeyFocus}"/>
+            <Setter Property="GroupName" Value="Theme"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Bg" Background="Transparent" BorderBrush="Transparent" BorderThickness="1.5" CornerRadius="7" Width="36" Height="26">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter Property="Foreground" Value="{DynamicResource Text}"/></Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Elevated}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource Text}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="Chip" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="{DynamicResource Text}"/>
+            <Setter Property="Background" Value="{DynamicResource ChipBg}"/>
+            <Setter Property="Padding" Value="10,6,9,6"/>
+            <Setter Property="FocusVisualStyle" Value="{StaticResource KeyFocus}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="Transparent" BorderThickness="1.5" CornerRadius="9" Padding="{TemplateBinding Padding}">
+                            <StackPanel Orientation="Horizontal">
+                                <ContentPresenter VerticalAlignment="Center"/>
+                                <Path Data="M0,0 L4,4 L8,0" Stroke="{DynamicResource Muted}" StrokeThickness="1.5" Margin="7,1,0,0"
+                                      VerticalAlignment="Center" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource ChipHover}"/></Trigger>
+                            <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.45"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SmallChip" TargetType="Button" BasedOn="{StaticResource Chip}">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Padding" Value="8,2,7,2"/>
+            <Setter Property="Margin" Value="0,0,6,0"/>
+        </Style>
+
+        <Style x:Key="TrimChip" TargetType="Button" BasedOn="{StaticResource Chip}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding TrimMode}" Value="part">
+                    <Setter Property="Background" Value="{DynamicResource AccentSoft}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource AccentSoftText}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="TrimChipLabel" TargetType="TextBlock">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Setter Property="Margin" Value="6,0,0,0"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding TrimMode}" Value="part"><Setter Property="Visibility" Value="Visible"/></DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="LoginChip" TargetType="Button" BasedOn="{StaticResource Chip}">
+            <Setter Property="Background" Value="{DynamicResource AccentSoft}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AccentSoftText}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Login}" Value="none">
+                    <Setter Property="Background" Value="{DynamicResource ChipBg}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource Text}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="LoginChipLabel" TargetType="TextBlock">
+            <Setter Property="Margin" Value="6,0,0,0"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Login}" Value="none"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="KindIcon" TargetType="Path" BasedOn="{StaticResource Ic}">
+            <Setter Property="Data" Value="{StaticResource IcVideo}"/>
+            <Setter Property="Margin" Value="0,0,6,0"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Kind}" Value="audio"><Setter Property="Data" Value="{StaticResource IcMusic}"/></DataTrigger>
+                <DataTrigger Binding="{Binding Kind}" Value="split"><Setter Property="Data" Value="{StaticResource IcSplit}"/></DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="HideForAudio" TargetType="Button" BasedOn="{StaticResource Chip}">
+            <Setter Property="Margin" Value="0,0,6,6"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Kind}" Value="audio">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ShowForSplit" TargetType="Button" BasedOn="{StaticResource Chip}">
+            <Setter Property="Margin" Value="0,0,6,6"/>
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Kind}" Value="split">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ShowForTrim" TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding TrimMode}" Value="part">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="Switch" TargetType="CheckBox">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="{DynamicResource Text}"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <StackPanel Orientation="Horizontal" Background="Transparent">
+                            <Border x:Name="Track" Width="36" Height="22" CornerRadius="11" Background="{DynamicResource SwitchOff}" BorderBrush="Transparent" BorderThickness="1.5" VerticalAlignment="Center">
+                                <Ellipse x:Name="Knob" Width="16" Height="16" Fill="White" HorizontalAlignment="Left" Margin="1,0"/>
+                            </Border>
+                            <ContentPresenter Margin="8,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Track" Property="Background" Value="{DynamicResource Primary}"/>
+                                <Setter TargetName="Knob" Property="HorizontalAlignment" Value="Right"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource AccentSoftText}"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="Menu" TargetType="ContextMenu">
+            <Setter Property="HasDropShadow" Value="False"/>
+            <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ContextMenu">
+                        <Border Background="{DynamicResource Elevated}" CornerRadius="10" Padding="5" Margin="10" MinWidth="170"
+                                BorderBrush="{DynamicResource Line}" BorderThickness="1" Effect="{StaticResource MenuShadow}">
+                            <ItemsPresenter/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="MenuEntry" TargetType="MenuItem">
+            <Setter Property="Foreground" Value="{DynamicResource Text}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Border x:Name="Bd" Background="Transparent" CornerRadius="6" Padding="8,6,14,6">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock x:Name="Check" Text="✓" Width="18" Visibility="Hidden" FontWeight="SemiBold"/>
+                                <ContentPresenter ContentSource="Header" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True"><Setter TargetName="Check" Property="Visibility" Value="Visible"/></Trigger>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Primary}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource OnAccent}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="{DynamicResource Faint}"/>
+                                <Setter Property="Cursor" Value="Arrow"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="Thin" TargetType="ProgressBar">
+            <Setter Property="Height" Value="4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Grid ClipToBounds="True">
+                            <Border x:Name="PART_Track" Background="{DynamicResource ThumbBg}" CornerRadius="2"/>
+                            <Border x:Name="PART_Indicator" Background="{DynamicResource Accent}" CornerRadius="2" HorizontalAlignment="Left"/>
+                            <Border x:Name="Slider" Width="110" Background="{DynamicResource Accent}" CornerRadius="2" HorizontalAlignment="Left" Visibility="Collapsed">
+                                <Border.RenderTransform><TranslateTransform x:Name="SlideX" X="-110"/></Border.RenderTransform>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsIndeterminate" Value="True">
+                                <Setter TargetName="PART_Indicator" Property="Visibility" Value="Collapsed"/>
+                                <Setter TargetName="Slider" Property="Visibility" Value="Visible"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard x:Name="Slide">
+                                        <Storyboard RepeatBehavior="Forever">
+                                            <DoubleAnimation Storyboard.TargetName="SlideX" Storyboard.TargetProperty="X" From="-110" To="1500" Duration="0:0:2.4"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions><RemoveStoryboard BeginStoryboardName="Slide"/></Trigger.ExitActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="Caption" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource Muted}"/>
+            <Setter Property="Margin" Value="2,0,0,4"/>
+        </Style>
+
+        <Style x:Key="HintText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource Muted}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="2,6,0,0"/>
+            <Setter Property="Visibility" Value="Collapsed"/>
+        </Style>
+
+        <Style x:Key="Badge" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource AccentSoft}"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Padding" Value="6,1"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+        </Style>
+
+        <Style x:Key="Sheet" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource Elevated}"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Padding" Value="26,24"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Effect" Value="{StaticResource MenuShadow}"/>
+        </Style>
+
+        <Style x:Key="DocPanel" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource Sidebar}"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="14,12,14,6"/>
+            <Setter Property="Margin" Value="0,2,0,12"/>
+        </Style>
+        <Style x:Key="DocCallout" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource WarnSoft}"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="14,11"/>
+            <Setter Property="Margin" Value="0,2,0,12"/>
+        </Style>
+        <Style x:Key="DocStepNumber" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource AccentSoft}"/>
+            <Setter Property="Width" Value="22"/>
+            <Setter Property="Height" Value="22"/>
+            <Setter Property="CornerRadius" Value="11"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+        </Style>
+        <Style x:Key="DocIndexGroup" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource Muted}"/>
+            <Setter Property="Margin" Value="10,14,0,4"/>
+        </Style>
+        <Style x:Key="DocH2" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe UI Variable Display, Segoe UI"/>
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+        <Style x:Key="DocLead" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="{DynamicResource Muted}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="0,2,0,0"/>
+        </Style>
+        <Style x:Key="DocH3" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,12,0,6"/>
+        </Style>
+        <Style x:Key="DocText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="LineHeight" Value="21"/>
+            <Setter Property="Margin" Value="0,0,0,7"/>
+        </Style>
+
+        <DataTemplate x:Key="PreviewRow">
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid Width="80" Height="45" Margin="0,0,12,0">
+                    <Border CornerRadius="6" Background="{DynamicResource ThumbBg}"/>
+                    <Path Style="{StaticResource IcSmall}" Data="{StaticResource IcPlay}" Stroke="{DynamicResource ThumbIcon}" HorizontalAlignment="Center"/>
+                    <Border CornerRadius="6">
+                        <Border.Background><ImageBrush ImageSource="{Binding Thumb, Converter={StaticResource ThumbConv}}" Stretch="UniformToFill"/></Border.Background>
+                    </Border>
+                </Grid>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <Button Style="{StaticResource TitleLink}" Tag="p:link" Content="{Binding Title}" ToolTip="Abrir no navegador" FontSize="13"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                        <TextBlock Text="{Binding Site}" FontSize="12" Foreground="{DynamicResource Muted}"/>
+                        <TextBlock Text="{Binding Duration}" FontSize="12" Foreground="{DynamicResource Muted}" Margin="10,0,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+                <TextBlock x:Name="Size" Grid.Column="2" Text="{Binding SizeText}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="14,0,6,0" ToolTip="Tamanho aproximado com as opções escolhidas"/>
+                <Button Grid.Column="3" Style="{StaticResource IconBtn}" Tag="p:remove" ToolTip="Tirar este link" AutomationProperties.Name="Tirar este link">
+                    <Path Style="{StaticResource IcSmall}" Data="{StaticResource IcClose}"/>
+                </Button>
+            </Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Busy}" Value="True">
+                    <Setter TargetName="Size" Property="Foreground" Value="{DynamicResource Muted}"/>
+                    <Setter TargetName="Size" Property="FontWeight" Value="Normal"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ItemCard">
+            <Border BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1" Padding="0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Width="112" Height="63" Margin="0,0,16,0" VerticalAlignment="Top">
+                        <Border CornerRadius="8" Background="{DynamicResource ThumbBg}"/>
+                        <Path Style="{StaticResource Ic}" Data="{StaticResource IcPlay}" Stroke="{DynamicResource ThumbIcon}" HorizontalAlignment="Center"/>
+                        <Border CornerRadius="8">
+                            <Border.Background>
+                                <ImageBrush ImageSource="{Binding Thumb, Converter={StaticResource ThumbConv}}" Stretch="UniformToFill"/>
+                            </Border.Background>
+                        </Border>
+                    </Grid>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <Button Style="{StaticResource TitleLink}" Tag="link" Content="{Binding Title}" ToolTip="Abrir no navegador"/>
+                        <DockPanel Margin="0,3,0,0">
+                            <TextBlock DockPanel.Dock="Left" Text="{Binding Site}" FontSize="12" Foreground="{DynamicResource Muted}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                            <Border DockPanel.Dock="Left" Style="{StaticResource Badge}" Visibility="{Binding HasTrim, Converter={StaticResource B2V}}">
+                                <TextBlock Text="{Binding TrimLabel}" FontSize="11" Foreground="{DynamicResource AccentSoftText}"/>
+                            </Border>
+                            <TextBlock x:Name="St" Text="{Binding Status}" ToolTip="{Binding Status}" FontSize="12" Foreground="{DynamicResource Muted}"
+                                       TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                        </DockPanel>
+                        <ProgressBar x:Name="Pb" Style="{StaticResource Thin}" Value="{Binding Progress}" Maximum="100" Margin="0,8,0,0"
+                                     IsIndeterminate="{Binding Busy}" Visibility="Collapsed"/>
+
+                        <StackPanel x:Name="ErrPanel" Margin="0,5,0,0" Visibility="Collapsed">
+                            <TextBlock Text="{Binding ErrFix}" FontSize="12" TextWrapping="Wrap"/>
+                            <WrapPanel Margin="0,7,0,0">
+                                <Button Style="{StaticResource Pill}" Tag="retry" Content="Tentar de novo" Margin="0,0,6,2"/>
+                                <Button Style="{StaticResource Pill}" Tag="err:action" Content="{Binding ErrAction}" Margin="0,0,6,2"
+                                        Visibility="{Binding HasErrAction, Converter={StaticResource B2V}}"/>
+                                <Button Style="{StaticResource Link}" Tag="err:details" Content="Detalhes" FontSize="12" Margin="6,0,10,2" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding ErrCode}" FontSize="11" Foreground="{DynamicResource Faint}" VerticalAlignment="Center"/>
+                            </WrapPanel>
+                        </StackPanel>
+
+                        <WrapPanel x:Name="Chips" Margin="0,7,0,0" Visibility="Collapsed">
+                            <Button Style="{StaticResource SmallChip}" Tag="chip:kind" Content="{Binding KindLabel}" ToolTip="Tipo do download"/>
+                            <Button Tag="chip:quality" Content="{Binding QualityLabel}" ToolTip="Qualidade">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource SmallChip}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Kind}" Value="audio"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                            <Button Style="{StaticResource SmallChip}" Tag="chip:fmt" Content="{Binding FmtLabel}" ToolTip="Formato do arquivo"/>
+                            <Button Tag="chip:afmt" Content="{Binding SplitAudioLabel}" ToolTip="Formato do áudio">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource SmallChip}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Kind}" Value="split"><Setter Property="Visibility" Value="Visible"/></DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                            <Button x:Name="LoginChip" Style="{StaticResource SmallChip}" Tag="chip:login" Content="{Binding LoginLabel}" ToolTip="Login para conteúdo restrito" Visibility="Collapsed"/>
+                        </WrapPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Top" Margin="12,0,0,0">
+                        <Button x:Name="OpenBtn" Style="{StaticResource IconBtn}" Tag="open" ToolTip="Abrir o arquivo" AutomationProperties.Name="Abrir o arquivo" Visibility="Collapsed">
+                            <Path Style="{StaticResource Ic}" Data="{StaticResource IcPlay}"/>
+                        </Button>
+                        <Button x:Name="ShowBtn" Style="{StaticResource IconBtn}" Tag="show" ToolTip="Mostrar na pasta" AutomationProperties.Name="Mostrar na pasta" Visibility="Collapsed">
+                            <Path Style="{StaticResource Ic}" Data="{StaticResource IcFolder}"/>
+                        </Button>
+                        <Button x:Name="PauseBtn" Style="{StaticResource IconBtn}" Tag="pause" ToolTip="Pausar" AutomationProperties.Name="Pausar" Visibility="{Binding CanPause, Converter={StaticResource B2V}}">
+                            <Path Style="{StaticResource Ic}" Data="{StaticResource IcPause}"/>
+                        </Button>
+                        <Button x:Name="ResumeBtn" Style="{StaticResource IconBtn}" Tag="resume" ToolTip="Continuar" AutomationProperties.Name="Continuar" Visibility="Collapsed" Foreground="{DynamicResource Accent}">
+                            <Path Style="{StaticResource Ic}" Data="{StaticResource IcPlay}"/>
+                        </Button>
+                        <Button x:Name="RetryBtn" Style="{StaticResource IconBtn}" Tag="retry" ToolTip="Baixar de novo" AutomationProperties.Name="Baixar de novo" Visibility="Collapsed">
+                            <Path Style="{StaticResource Ic}" Data="{StaticResource IcRetry}"/>
+                        </Button>
+                        <Button Style="{StaticResource IconBtn}" Tag="remove" ToolTip="{Binding CancelTip}" AutomationProperties.Name="{Binding CancelTip}">
+                            <Path Style="{StaticResource Ic}" Data="{StaticResource IcClose}"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding State}" Value="fila">
+                    <Setter TargetName="Chips" Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding State}" Value="baixando">
+                    <Setter TargetName="Pb" Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding State}" Value="pausado">
+                    <Setter TargetName="Pb" Property="Visibility" Value="Visible"/>
+                    <Setter TargetName="Pb" Property="Opacity" Value="0.4"/>
+                    <Setter TargetName="St" Property="Foreground" Value="{DynamicResource Warn}"/>
+                    <Setter TargetName="ResumeBtn" Property="Visibility" Value="Visible"/>
+                    <Setter TargetName="Chips" Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding State}" Value="ok">
+                    <Setter TargetName="St" Property="Foreground" Value="{DynamicResource Good}"/>
+                    <Setter TargetName="OpenBtn" Property="Visibility" Value="Visible"/>
+                    <Setter TargetName="ShowBtn" Property="Visibility" Value="Visible"/>
+                    <Setter TargetName="RetryBtn" Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding State}" Value="cancelado">
+                    <Setter TargetName="RetryBtn" Property="Visibility" Value="Visible"/>
+                    <Setter TargetName="Chips" Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding State}" Value="erro">
+                    <Setter TargetName="St" Property="Foreground" Value="{DynamicResource Danger}"/>
+                    <Setter TargetName="St" Property="FontWeight" Value="SemiBold"/>
+                    <Setter TargetName="ErrPanel" Property="Visibility" Value="Visible"/>
+                    <Setter TargetName="LoginChip" Property="Visibility" Value="Visible"/>
+                    <Setter TargetName="Chips" Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <DataTemplate x:Key="LibCard">
+            <Border BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1" Padding="0,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid x:Name="Th" Width="96" Height="54" Margin="0,0,16,0">
+                        <Border CornerRadius="8" Background="{DynamicResource ThumbBg}"/>
+                        <Path Style="{StaticResource Ic}" Data="{StaticResource IcPlay}" Stroke="{DynamicResource ThumbIcon}" HorizontalAlignment="Center"/>
+                        <Border CornerRadius="8">
+                            <Border.Background>
+                                <ImageBrush ImageSource="{Binding Thumb, Converter={StaticResource ThumbConv}}" Stretch="UniformToFill"/>
+                            </Border.Background>
+                        </Border>
+                    </Grid>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <Button Style="{StaticResource TitleLink}" Tag="h:link" Content="{Binding Title}" ToolTip="Abrir no navegador"/>
+                        <DockPanel Margin="0,3,0,0">
+                            <TextBlock DockPanel.Dock="Left" Text="{Binding Site}" FontSize="12" Foreground="{DynamicResource Muted}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="Meta" Text="{Binding Meta}" ToolTip="{Binding Meta}" FontSize="12" Foreground="{DynamicResource Muted}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                        </DockPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
+                        <Button x:Name="OpenBtn" Style="{StaticResource IconBtn}" Tag="h:open" ToolTip="Abrir o arquivo" AutomationProperties.Name="Abrir o arquivo">
+                            <Path Style="{StaticResource Ic}" Data="{StaticResource IcPlay}"/>
+                        </Button>
+                        <Button x:Name="ShowBtn" Style="{StaticResource IconBtn}" Tag="h:show" ToolTip="Mostrar na pasta" AutomationProperties.Name="Mostrar na pasta">
+                            <Path Style="{StaticResource Ic}" Data="{StaticResource IcFolder}"/>
+                        </Button>
+                        <Button Style="{StaticResource IconBtn}" Tag="h:again" ToolTip="Baixar de novo com as mesmas opções" AutomationProperties.Name="Baixar de novo">
+                            <Path Style="{StaticResource Ic}" Data="{StaticResource IcRetry}"/>
+                        </Button>
+                        <Button Style="{StaticResource IconBtn}" Tag="h:remove" ToolTip="Tirar da biblioteca (o arquivo continua na pasta)" AutomationProperties.Name="Tirar da biblioteca">
+                            <Path Style="{StaticResource Ic}" Data="{StaticResource IcClose}"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Exists}" Value="False">
+                    <Setter TargetName="Meta" Property="Foreground" Value="{DynamicResource Warn}"/>
+                    <Setter TargetName="Th" Property="Opacity" Value="0.5"/>
+                    <Setter TargetName="OpenBtn" Property="Visibility" Value="Collapsed"/>
+                    <Setter TargetName="ShowBtn" Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <DataTemplate x:Key="SuggestCard">
+            <StackPanel Width="208" Margin="0,0,16,18">
+                <Button Style="{StaticResource Bare}" Tag="s:open" ToolTip="Abrir no navegador" AutomationProperties.Name="Abrir no navegador">
+                    <Border Height="117" CornerRadius="10" Background="{DynamicResource ThumbBg}">
+                        <Border CornerRadius="10">
+                            <Border.Background>
+                                <ImageBrush ImageSource="{Binding Thumb, Converter={StaticResource ThumbConv}}" Stretch="UniformToFill"/>
+                            </Border.Background>
+                        </Border>
+                    </Border>
+                </Button>
+                <TextBlock Text="{Binding Title}" ToolTip="{Binding Title}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"
+                           TextTrimming="CharacterEllipsis" Height="36" Margin="0,8,0,0"/>
+                <TextBlock Text="{Binding Info}" FontSize="12" Foreground="{DynamicResource Muted}" TextTrimming="CharacterEllipsis" Margin="0,2,0,8"/>
+                <Button x:Name="GetBtn" Style="{StaticResource Pill}" Tag="s:get" Content="Baixar" HorizontalAlignment="Left"/>
+            </StackPanel>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Queued}" Value="True">
+                    <Setter TargetName="GetBtn" Property="Content" Value="Na fila ✓"/>
+                    <Setter TargetName="GetBtn" Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid x:Name="RootGrid">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="SidebarColumn" Width="232"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Background="{DynamicResource Sidebar}" BorderBrush="{DynamicResource Line}" BorderThickness="0,0,1,0">
+                <Grid Margin="12,0,12,12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="52"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="4,6,0,0">
+                        <Border Width="26" Height="26" CornerRadius="7" Background="{DynamicResource Primary}" Margin="5,0,0,0">
+                            <Path Style="{StaticResource IcSmall}" Data="{StaticResource IcDownload}" Stroke="White" HorizontalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="Downloader" FontFamily="Segoe UI Variable Display, Segoe UI" FontSize="15" FontWeight="SemiBold" Margin="10,0,0,0" VerticalAlignment="Center" Visibility="{DynamicResource NavLabel}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Margin="0,10,0,0">
+                        <RadioButton x:Name="TabDownloads" Style="{StaticResource Nav}" GroupName="Nav" IsChecked="True" ToolTip="Downloads" AutomationProperties.Name="Downloads">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{StaticResource Ic}" Data="{StaticResource IcDownload}"/>
+                                <TextBlock Text="Downloads" Margin="10,0,0,0" VerticalAlignment="Center" Visibility="{DynamicResource NavLabel}"/>
+                            </StackPanel>
+                        </RadioButton>
+                        <RadioButton x:Name="TabLibrary" Style="{StaticResource Nav}" GroupName="Nav" ToolTip="Tudo que você baixou" AutomationProperties.Name="Biblioteca">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{StaticResource Ic}" Data="{StaticResource IcLibrary}"/>
+                                <TextBlock Text="Biblioteca" Margin="10,0,0,0" VerticalAlignment="Center" Visibility="{DynamicResource NavLabel}"/>
+                            </StackPanel>
+                        </RadioButton>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2">
+                        <StackPanel Margin="0,0,0,10">
+                            <RadioButton x:Name="TabHelp" Style="{StaticResource NavSmall}" GroupName="Nav" ToolTip="Como copiar links, escolher opções e resolver problemas" AutomationProperties.Name="Ajuda">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Style="{StaticResource IcSmall}" Data="{StaticResource IcHelp}"/>
+                                    <TextBlock Text="Ajuda" Margin="9,0,0,0" VerticalAlignment="Center" Visibility="{DynamicResource NavLabel}"/>
+                                </StackPanel>
+                            </RadioButton>
+                            <RadioButton x:Name="TabNews" Style="{StaticResource NavSmall}" GroupName="Nav" ToolTip="O que mudou em cada versão" AutomationProperties.Name="Novidades">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Style="{StaticResource IcSmall}" Data="{StaticResource IcSparkle}"/>
+                                    <TextBlock Text="Novidades" Margin="9,0,0,0" VerticalAlignment="Center" Visibility="{DynamicResource NavLabel}"/>
+                                    <Ellipse x:Name="NewsDot" Width="6" Height="6" Fill="{DynamicResource Accent}" Margin="6,0,0,0" VerticalAlignment="Center" Visibility="Collapsed" ToolTip="Há novidades nesta versão"/>
+                                </StackPanel>
+                            </RadioButton>
+                            <RadioButton x:Name="TabLegal" Style="{StaticResource NavSmall}" GroupName="Nav" ToolTip="Termos de Uso, Privacidade, Diretrizes, Ética e autoria" AutomationProperties.Name="Termos e políticas">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Style="{StaticResource IcSmall}" Data="{StaticResource IcShield}"/>
+                                    <TextBlock Text="Termos e políticas" Margin="9,0,0,0" VerticalAlignment="Center" Visibility="{DynamicResource NavLabel}"/>
+                                </StackPanel>
+                            </RadioButton>
+                        </StackPanel>
+
+                        <Border Background="{DynamicResource Canvas}" BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="10" Margin="0,0,0,10">
+                            <DockPanel x:Name="DestRow" LastChildFill="True">
+                                <Button x:Name="ChangeDestBtn" DockPanel.Dock="Right" Style="{StaticResource Link}" FontSize="12" Margin="4,0,10,0" VerticalAlignment="Center"
+                                        ToolTip="Escolher outra pasta para os downloads" AutomationProperties.Name="Alterar a pasta de destino">
+                                    <Grid>
+                                        <TextBlock Text="Alterar" Visibility="{DynamicResource NavLabel}"/>
+                                        <Path Style="{StaticResource IcSmall}" Data="{StaticResource IcEdit}" Visibility="{DynamicResource NavIcon}"/>
+                                    </Grid>
+                                </Button>
+                                <Button x:Name="FolderBtn" Style="{StaticResource Bare}" AutomationProperties.Name="Abrir a pasta de destino" HorizontalContentAlignment="Stretch">
+                                    <Grid Background="Transparent" Margin="10,8,4,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Path Style="{StaticResource Ic}" Data="{StaticResource IcFolder}" Stroke="{DynamicResource Muted}"/>
+                                        <StackPanel Grid.Column="1" Margin="9,0,0,0" Visibility="{DynamicResource NavLabel}">
+                                            <TextBlock x:Name="DestText" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource Text}" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock x:Name="DestPath" FontSize="11" Foreground="{DynamicResource Muted}" TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Button>
+                            </DockPanel>
+                        </Border>
+                        <Border Background="{DynamicResource NavSelected}" CornerRadius="9" Padding="2" HorizontalAlignment="Left" Margin="0,0,0,10">
+                            <StackPanel x:Name="ThemePanel" Orientation="Horizontal">
+                                <RadioButton x:Name="ThemeSystem" Style="{StaticResource ThemeSeg}" ToolTip="Tema do Windows" AutomationProperties.Name="Tema do Windows">
+                                    <Path Style="{StaticResource IcSmall}" Data="{StaticResource IcMonitor}"/>
+                                </RadioButton>
+                                <RadioButton x:Name="ThemeLight" Style="{StaticResource ThemeSeg}" ToolTip="Tema claro" AutomationProperties.Name="Tema claro">
+                                    <Path Style="{StaticResource IcSmall}" Data="{StaticResource IcSun}"/>
+                                </RadioButton>
+                                <RadioButton x:Name="ThemeDark" Style="{StaticResource ThemeSeg}" ToolTip="Tema escuro" AutomationProperties.Name="Tema escuro">
+                                    <Path Style="{StaticResource IcSmall}" Data="{StaticResource IcMoon}"/>
+                                </RadioButton>
+                            </StackPanel>
+                        </Border>
+                        <TextBlock x:Name="FooterText" FontSize="11" Foreground="{DynamicResource Faint}" TextWrapping="Wrap" Margin="6,0,0,0" Visibility="{DynamicResource NavLabel}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Grid x:Name="MainContent" Grid.Column="1" Margin="44,0,44,14">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Grid Margin="0,40,0,14">
+                    <TextBlock x:Name="ViewTitle" Text="Downloads" FontFamily="Segoe UI Variable Display, Segoe UI" FontSize="30" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <StackPanel x:Name="QueueActions" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Button x:Name="PauseAllBtn" Style="{StaticResource Link}" Content="Pausar tudo" Margin="0,0,16,0" VerticalAlignment="Center"/>
+                        <Button x:Name="ClearBtn" Style="{StaticResource IconBtn}" ToolTip="Limpar concluídos" AutomationProperties.Name="Limpar concluídos">
+                            <Path Style="{StaticResource Ic}" Data="{StaticResource IcClear}"/>
+                        </Button>
+                    </StackPanel>
+                    <Grid x:Name="SearchWrap" HorizontalAlignment="Right" VerticalAlignment="Center" Width="280">
+                        <TextBox x:Name="SearchBox" Style="{StaticResource Field}" Padding="36,8,12,8" FontSize="13" Tag="Buscar por título ou canal" Visibility="Collapsed"/>
+                        <Path Style="{StaticResource IcSmall}" Data="{StaticResource IcSearch}" Stroke="{DynamicResource Muted}" HorizontalAlignment="Left" Margin="12,0,0,0" IsHitTestVisible="False"
+                              Visibility="{Binding Visibility, ElementName=SearchBox}"/>
+                    </Grid>
+                </Grid>
+
+                <StackPanel x:Name="InputCard" Grid.Row="1">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid>
+                            <TextBox x:Name="LinksBox" Style="{StaticResource Field}" MinHeight="52" MaxHeight="128" AcceptsReturn="True" TextWrapping="NoWrap" FontSize="15"
+                                     Padding="42,13,48,13" HorizontalScrollBarVisibility="Hidden" Tag="Cole o link do vídeo. Para vários, um por linha."
+                                     AutomationProperties.Name="Links"/>
+                            <Path Style="{StaticResource Ic}" Data="{StaticResource IcLink}" Stroke="{DynamicResource Muted}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15,17,0,0" IsHitTestVisible="False"/>
+                            <Button x:Name="PasteBtn" Style="{StaticResource IconBtn}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0"
+                                    ToolTip="Colar da área de transferência" AutomationProperties.Name="Colar">
+                                <Path Style="{StaticResource Ic}" Data="{StaticResource IcPaste}"/>
+                            </Button>
+                        </Grid>
+                        <Button x:Name="DownloadBtn" Grid.Column="1" Style="{StaticResource PrimaryBtn}" Height="52" MinWidth="124" Margin="10,0,0,0" VerticalAlignment="Top" AutomationProperties.Name="Baixar">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{StaticResource Ic}" Data="{StaticResource IcDownload}" Margin="0,0,7,0"/>
+                                <TextBlock Text="Baixar" FontSize="15" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                    <TextBlock x:Name="LinkHint" Style="{StaticResource HintText}"/>
+
+                    <Grid Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <WrapPanel>
+                            <Button Style="{StaticResource Chip}" Margin="0,0,6,6" Tag="chip:kind" ToolTip="Tipo: vídeo com som, vídeo e áudio em dois arquivos, ou só o áudio" AutomationProperties.Name="Tipo">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Style="{StaticResource KindIcon}"/>
+                                    <TextBlock Text="{Binding KindLabel}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource HideForAudio}" Tag="chip:quality" Content="{Binding QualityLabel}" ToolTip="Qualidade: Máxima pega a melhor que o site oferece" AutomationProperties.Name="Qualidade"/>
+                            <Button Style="{StaticResource Chip}" Margin="0,0,6,6" Tag="chip:fmt" Content="{Binding FmtLabel}" ToolTip="Formato: MKV guarda a melhor qualidade. MP4 abre em mais programas e no celular." AutomationProperties.Name="Formato"/>
+                            <Button Style="{StaticResource ShowForSplit}" Tag="chip:afmt" Content="{Binding SplitAudioLabel}" ToolTip="Formato do áudio" AutomationProperties.Name="Formato do áudio"/>
+                            <Button Style="{StaticResource TrimChip}" Margin="0,0,6,6" Tag="chip:trim" ToolTip="Duração: o vídeo inteiro ou só um trecho" AutomationProperties.Name="Duração">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Style="{StaticResource Ic}" Data="{StaticResource IcScissors}"/>
+                                    <TextBlock Style="{StaticResource TrimChipLabel}" Text="{Binding TrimModeLabel}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource LoginChip}" Margin="0,0,6,6" Tag="chip:login" ToolTip="Conteúdo restrito: só para o que exige conta. Conteúdo público não precisa." AutomationProperties.Name="Conteúdo restrito">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Style="{StaticResource Ic}" Data="{StaticResource IcLock}"/>
+                                    <TextBlock Style="{StaticResource LoginChipLabel}" Text="{Binding LoginLabel}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </WrapPanel>
+                        <TextBlock x:Name="TotalText" Grid.Column="1" FontWeight="SemiBold" VerticalAlignment="Top" Margin="12,6,0,0" ToolTip="Soma dos links colados, com as opções escolhidas"/>
+                    </Grid>
+
+                    <StackPanel Style="{StaticResource ShowForTrim}" Margin="0,4,0,0">
+                        <WrapPanel>
+                            <StackPanel Margin="0,0,10,0">
+                                <TextBlock Style="{StaticResource Caption}" Text="Início"/>
+                                <TextBox x:Name="TrimStartBox" Style="{StaticResource Field}" Width="96" Padding="10,6" FontSize="13" Tag="00:00"
+                                         AutomationProperties.Name="Início" ToolTip="Minutos:segundos, como 03:15. Vazio = desde o começo."/>
+                            </StackPanel>
+                            <StackPanel Margin="0,0,16,0">
+                                <TextBlock Style="{StaticResource Caption}" Text="Fim"/>
+                                <TextBox x:Name="TrimEndBox" Style="{StaticResource Field}" Width="96" Padding="10,6" FontSize="13" Tag="05:40"
+                                         AutomationProperties.Name="Fim" ToolTip="Minutos:segundos, como 05:40. Vazio = até o final."/>
+                            </StackPanel>
+                            <CheckBox x:Name="TrimExactBox" Style="{StaticResource Switch}" Content="Corte exato" IsChecked="True" FontSize="13" VerticalAlignment="Bottom" Margin="0,0,0,8"
+                                      ToolTip="Ligado: começa e termina no segundo escolhido, convertendo o vídeo para H.264. Desligado: mais fiel ao original, mas pode começar alguns segundos antes."/>
+                        </WrapPanel>
+                        <TextBlock x:Name="TrimHint" Style="{StaticResource HintText}"/>
+                    </StackPanel>
+                    <TextBlock x:Name="LoginHint" Style="{StaticResource HintText}"/>
+
+                    <StackPanel x:Name="PreviewPanel" Margin="0,8,0,0" Visibility="Collapsed">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="212">
+                            <ItemsControl x:Name="PreviewList" ItemTemplate="{StaticResource PreviewRow}"/>
+                        </ScrollViewer>
+                        <TextBlock x:Name="PreviewMore" Style="{StaticResource HintText}" Margin="2,0,0,4"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <Grid x:Name="DownloadsView" Grid.Row="2" Margin="0,8,0,0">
+                    <StackPanel x:Name="EmptyHint" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Path Style="{StaticResource Ic}" Data="{StaticResource IcDownload}" Stroke="{DynamicResource Faint}" HorizontalAlignment="Center">
+                            <Path.LayoutTransform><ScaleTransform ScaleX="1.7" ScaleY="1.7"/></Path.LayoutTransform>
+                        </Path>
+                        <TextBlock Text="Seus downloads aparecem aqui" FontSize="17" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,10,0,4"/>
+                        <TextBlock Text="Cole um link acima para começar." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center"/>
+                        <Button x:Name="EmptyHelpBtn" Style="{StaticResource Link}" Content="Como copiar o link de um vídeo?" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                    </StackPanel>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="0,0,10,0">
+                            <ItemsControl x:Name="ItemsList" ItemTemplate="{StaticResource ItemCard}"/>
+                            <StackPanel x:Name="SuggestPanel" Visibility="Collapsed" Margin="0,22,0,0">
+                                <TextBlock x:Name="SuggestTitle" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                                <ItemsControl x:Name="SuggestList" ItemTemplate="{StaticResource SuggestCard}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+                <Border x:Name="CopyrightBar" Grid.Row="3" Background="{DynamicResource Sidebar}" CornerRadius="10" Padding="12,8" Margin="0,10,0,0">
+                    <DockPanel>
+                        <Path DockPanel.Dock="Left" Style="{StaticResource IcSmall}" Data="{StaticResource IcInfo}" Stroke="{DynamicResource Accent}" Margin="0,0,9,0" VerticalAlignment="Top"/>
+                        <Button x:Name="CopyrightLink" DockPanel.Dock="Right" Style="{StaticResource Link}" Content="Diretrizes de Uso" FontSize="12" Margin="14,0,0,0" VerticalAlignment="Center"/>
+                        <TextBlock FontSize="12" TextWrapping="Wrap" VerticalAlignment="Center"
+                                   Text="Baixe somente conteúdo próprio ou que você tem autorização para usar. Você é responsável pelo que baixa e pelo uso dos arquivos."/>
+                    </DockPanel>
+                </Border>
+
+                <Grid x:Name="LibraryView" Grid.Row="1" Grid.RowSpan="3" Visibility="Collapsed">
+                    <TextBlock x:Name="LibEmpty" Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <ItemsControl x:Name="LibList" ItemTemplate="{StaticResource LibCard}" VirtualizingPanel.IsVirtualizing="True"
+                                  VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.ScrollUnit="Pixel" ScrollViewer.CanContentScroll="True">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate><VirtualizingStackPanel Margin="0,0,10,0"/></ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.Template>
+                            <ControlTemplate TargetType="ItemsControl">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" CanContentScroll="True" Focusable="False"><ItemsPresenter/></ScrollViewer>
+                            </ControlTemplate>
+                        </ItemsControl.Template>
+                    </ItemsControl>
+                </Grid>
+            </Grid>
+
+            <Grid x:Name="PagePanel" Grid.Column="1" Background="{DynamicResource Canvas}" Visibility="Collapsed">
+                <Grid x:Name="PageContent" Margin="44,0,44,14">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid Margin="0,40,0,14">
+                        <TextBlock x:Name="PageTitle" FontFamily="Segoe UI Variable Display, Segoe UI" FontSize="30" FontWeight="SemiBold"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <Button x:Name="LogsBtn" Style="{StaticResource Link}" Content="Registros de diagnóstico" Margin="0,0,16,0" ToolTip="Abre a pasta com o registro técnico dos erros"/>
+                            <Button x:Name="LicensesBtn" Style="{StaticResource Link}" Content="Licenças" Margin="0,0,16,0"/>
+                            <Button x:Name="PageBack" Style="{StaticResource Link}" Content="Fechar" ToolTip="Esc"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="196"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="-9,0,14,0">
+                            <StackPanel x:Name="PageIndex" Margin="0,0,10,0"/>
+                        </ScrollViewer>
+                        <ScrollViewer x:Name="PageScroll" Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                            <StackPanel x:Name="PageBody" MaxWidth="680" HorizontalAlignment="Left" Margin="0,0,14,12"/>
+                        </ScrollViewer>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <Grid x:Name="ErrorSheet" Background="{DynamicResource Scrim}" Visibility="Collapsed">
+            <Border Style="{StaticResource Sheet}" Width="580" Margin="20">
+                <StackPanel>
+                    <TextBlock x:Name="ErrHeader" FontSize="12" Foreground="{DynamicResource Muted}"/>
+                    <TextBlock x:Name="ErrTitle" FontFamily="Segoe UI Variable Display, Segoe UI" FontSize="19" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,2,0,12"/>
+                    <TextBlock Style="{StaticResource Caption}" Text="Possível causa" Margin="0,0,0,2"/>
+                    <TextBlock x:Name="ErrCause" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                    <TextBlock Style="{StaticResource Caption}" Text="O que fazer" Margin="0,0,0,2"/>
+                    <TextBlock x:Name="ErrFixText" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                    <TextBlock x:Name="ErrMeta" FontSize="11" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" Margin="0,0,0,6"/>
+                    <TextBox x:Name="ErrReportText" IsReadOnly="True" Height="118" FontFamily="Consolas" FontSize="11" TextWrapping="Wrap" BorderThickness="0"
+                             Background="{DynamicResource FieldBg}" Foreground="{DynamicResource Text}" CaretBrush="{DynamicResource Text}" SelectionBrush="{DynamicResource Accent}" Padding="6" VerticalScrollBarVisibility="Auto"/>
+                    <TextBlock x:Name="ErrPrivacy" FontSize="11" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                    <Grid Margin="0,14,0,0">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                            <Button x:Name="ErrCopy" Style="{StaticResource Link}" Content="Copiar detalhes" Margin="0,0,14,0"/>
+                            <Button x:Name="ErrReport" Style="{StaticResource Link}" Content="Salvar relatório…" Margin="0,0,14,0"/>
+                            <TextBlock x:Name="ErrStatus" FontSize="12" Foreground="{DynamicResource Good}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="240"/>
+                        </StackPanel>
+                        <Button x:Name="ErrClose" Style="{StaticResource PrimaryBtn}" Content="Fechar" HorizontalAlignment="Right"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Grid x:Name="FirstRun" Background="{DynamicResource Scrim}" Visibility="Collapsed">
+            <Border Style="{StaticResource Sheet}" Width="470">
+                <StackPanel>
+                    <TextBlock Text="Onde salvar seus downloads?" FontFamily="Segoe UI Variable Display, Segoe UI" FontSize="20" FontWeight="SemiBold"/>
+                    <TextBlock Text="Tudo que você baixar vai para esta pasta. Dá para mudar depois em “Alterar”, na barra lateral."
+                               FontSize="13" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" Margin="0,6,0,16"/>
+                    <Border Background="{DynamicResource FieldBg}" CornerRadius="10" Padding="12,10">
+                        <TextBlock x:Name="FirstRunPath" TextTrimming="CharacterEllipsis"/>
+                    </Border>
+                    <Grid Margin="0,20,0,0">
+                        <Button x:Name="FirstRunPick" Style="{StaticResource Link}" Content="Escolher outra pasta…" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        <Button x:Name="FirstRunOk" Style="{StaticResource PrimaryBtn}" Content="Continuar" HorizontalAlignment="Right"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Grid x:Name="InstallSheet" Background="{DynamicResource Scrim}" Visibility="Collapsed">
+            <Border Style="{StaticResource Sheet}" Width="470">
+                <StackPanel>
+                    <TextBlock x:Name="InstallTitle" FontFamily="Segoe UI Variable Display, Segoe UI" FontSize="20" FontWeight="SemiBold"/>
+                    <TextBlock x:Name="InstallText" FontSize="13" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                    <Grid Margin="0,22,0,0">
+                        <Button x:Name="InstallSkip" Style="{StaticResource Link}" Content="Usar sem instalar" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        <Button x:Name="InstallOk" Style="{StaticResource PrimaryBtn}" Content="Instalar" HorizontalAlignment="Right"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+            <Button x:Name="MinBtn" Style="{StaticResource CaptionBtn}" ToolTip="Minimizar" AutomationProperties.Name="Minimizar">
+                <Path Style="{StaticResource IcSmall}" Data="{StaticResource IcMinimize}" StrokeThickness="1.6"/>
+            </Button>
+            <Button x:Name="MaxBtn" Style="{StaticResource CaptionBtn}" AutomationProperties.Name="Maximizar ou restaurar">
+                <Grid>
+                    <Path x:Name="MaxIcon" Style="{StaticResource IcSmall}" Data="{StaticResource IcMaximize}" StrokeThickness="1.6"/>
+                    <Path x:Name="RestoreIcon" Style="{StaticResource IcSmall}" Data="{StaticResource IcRestore}" StrokeThickness="1.6" Visibility="Collapsed"/>
+                </Grid>
+            </Button>
+            <Button x:Name="CloseBtn" Style="{StaticResource CaptionClose}" ToolTip="Fechar" AutomationProperties.Name="Fechar">
+                <Path Style="{StaticResource IcSmall}" Data="{StaticResource IcClose}" StrokeThickness="1.6"/>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>

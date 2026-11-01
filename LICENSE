@@ -1,0 +1,13 @@
+Copyright (c) 2026 ArchiveByLOPES. Todos os direitos reservados.
+
+O código deste repositório está disponível para consulta. Nenhuma licença é
+concedida para copiar, modificar, distribuir ou vender este software, no todo
+ou em parte, sem autorização por escrito do titular.
+
+O uso do programa compilado é regido pelos Termos de Uso incluídos nele e em
+src/legal.md.
+
+Os componentes de terceiros (yt-dlp, FFmpeg e Deno) não são cobertos por este
+aviso e seguem as próprias licenças, listadas em THIRD-PARTY-NOTICES.txt.
+
+Contato: contato.resoup@gmail.com
