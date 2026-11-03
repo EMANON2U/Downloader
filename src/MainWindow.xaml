@@ -41,6 +41,7 @@
         <Geometry x:Key="IcMonitor">M5 4H19A2 2 0 0 1 21 6V15A2 2 0 0 1 19 17H5A2 2 0 0 1 3 15V6A2 2 0 0 1 5 4Z M9 21H15 M12 17V21</Geometry>
         <Geometry x:Key="IcShield">M12 3L19 6V11C19 16 16 19.5 12 21C8 19.5 5 16 5 11V6Z M9 12L11.2 14.2L15 10</Geometry>
         <Geometry x:Key="IcInfo">M12 3A9 9 0 1 0 12 21A9 9 0 1 0 12 3Z M12 11V16.5 M12 7.5V7.51</Geometry>
+        <Geometry x:Key="IcGlobe">M12 3A9 9 0 1 0 12 21A9 9 0 1 0 12 3Z M3.5 12H20.5 M12 3C9.4 5.8 9.4 18.2 12 21 M12 3C14.6 5.8 14.6 18.2 12 21</Geometry>
         <Geometry x:Key="IcEdit">M4 20H8L19 9A2.1 2.1 0 0 0 16 6L5 17Z M14.5 7.5L17.5 10.5</Geometry>
         <Geometry x:Key="IcMinimize">M6.5 12H17.5</Geometry>
         <Geometry x:Key="IcMaximize">M7 7H17V17H7Z</Geometry>
@@ -1015,6 +1016,22 @@
                                 </Button>
                             </DockPanel>
                         </Border>
+                        <Border Background="{DynamicResource Canvas}" BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="10" Margin="0,0,0,10">
+                            <Button x:Name="BrowserBtn" Style="{StaticResource Bare}" HorizontalContentAlignment="Stretch"
+                                    ToolTip="Navegador usado para abrir os links. Os que estão abertos aparecem primeiro." AutomationProperties.Name="Navegador para abrir links">
+                                <Grid Background="Transparent" Margin="10,8,10,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Path Style="{StaticResource Ic}" Data="{StaticResource IcGlobe}" Stroke="{DynamicResource Muted}"/>
+                                    <StackPanel Grid.Column="1" Margin="9,0,0,0" Visibility="{DynamicResource NavLabel}">
+                                        <TextBlock Text="Abrir links no" FontSize="11" Foreground="{DynamicResource Muted}"/>
+                                        <TextBlock x:Name="BrowserText" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource Text}" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Button>
+                        </Border>
                         <Border Background="{DynamicResource NavSelected}" CornerRadius="9" Padding="2" HorizontalAlignment="Left" Margin="0,0,0,10">
                             <StackPanel x:Name="ThemePanel" Orientation="Horizontal">
                                 <RadioButton x:Name="ThemeSystem" Style="{StaticResource ThemeSeg}" ToolTip="Tema do Windows" AutomationProperties.Name="Tema do Windows">
@@ -1064,7 +1081,7 @@
                         </Grid.ColumnDefinitions>
                         <Grid>
                             <TextBox x:Name="LinksBox" Style="{StaticResource Field}" MinHeight="52" MaxHeight="128" AcceptsReturn="True" TextWrapping="NoWrap" FontSize="15"
-                                     Padding="42,13,48,13" HorizontalScrollBarVisibility="Hidden" Tag="Cole o link do vídeo. Para vários, um por linha."
+                                     Padding="42,13,48,13" HorizontalScrollBarVisibility="Hidden" Tag="Cole o link de um vídeo ou de uma música. Para vários, um por linha."
                                      AutomationProperties.Name="Links"/>
                             <Path Style="{StaticResource Ic}" Data="{StaticResource IcLink}" Stroke="{DynamicResource Muted}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15,17,0,0" IsHitTestVisible="False"/>
                             <Button x:Name="PasteBtn" Style="{StaticResource IconBtn}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0"
@@ -1146,7 +1163,12 @@
                         </Path>
                         <TextBlock Text="Seus downloads aparecem aqui" FontSize="17" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,10,0,4"/>
                         <TextBlock Text="Cole um link acima para começar." Foreground="{DynamicResource Muted}" HorizontalAlignment="Center"/>
-                        <Button x:Name="EmptyHelpBtn" Style="{StaticResource Link}" Content="Como copiar o link de um vídeo?" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                        <TextBlock Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="460" Margin="0,14,0,0" FontSize="12"
+                                   Text="Vídeos: YouTube, TikTok, Instagram, X e Facebook.&#10;Músicas: YouTube Music e SoundCloud. Spotify, Deezer e Apple Music pelo YouTube Music."/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
+                            <Button x:Name="SitesBtn" Style="{StaticResource Link}" Content="Sites compatíveis" Margin="0,0,18,0"/>
+                            <Button x:Name="EmptyHelpBtn" Style="{StaticResource Link}" Content="Como copiar o link?"/>
+                        </StackPanel>
                     </StackPanel>
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Margin="0,0,10,0">

@@ -1,6 +1,6 @@
 # Downloader
 
-Aplicativo para Windows que baixa vídeos e áudios a partir de um link. Você cola o link, vê o tamanho antes de baixar e escolhe o formato.
+Aplicativo para Windows que baixa vídeos e músicas a partir de um link. Você cola o link, vê o tamanho antes de baixar e escolhe o formato.
 
 ![Tela de downloads com um vídeo pronto para baixar, no tema claro](docs/img/downloads-claro.png)
 
@@ -19,11 +19,23 @@ O programa ainda não tem assinatura digital, então o Windows pode mostrar "O W
 - **Só um trecho:** baixa apenas o intervalo escolhido, com corte exato ou rápido.
 - **Fila:** vários links de uma vez, com pausa, retomada e cancelamento.
 - **Biblioteca:** o que você baixou neste PC, com busca e opção de baixar de novo.
-- **Conteúdo restrito:** usa o login do navegador ou um arquivo de cookies, e só se o site pedir.
+- **Músicas:** álbuns e playlists entram na fila com uma linha por música, em MP3 com artista e título.
+- **Conteúdo restrito:** usa o login do Firefox, Chrome, Edge, Brave, Opera ou Vivaldi, ou um arquivo de cookies, e só se o site pedir.
+- **Navegador dos links:** você escolhe onde os links abrem. Os navegadores abertos aparecem primeiro, e por padrão o programa pergunta.
 - **Erros claros:** causa, o que fazer, código e relatório que você revisa antes de compartilhar.
 - **Temas:** claro, escuro ou o do Windows.
 
-Funciona com YouTube e com os muitos sites compatíveis com o [yt-dlp](https://github.com/yt-dlp/yt-dlp). Cada site muda com o tempo, então a compatibilidade não é garantida.
+## Sites compatíveis
+
+| Origem | Sites | De onde vem o arquivo |
+|---|---|---|
+| Vídeos | YouTube, TikTok, Instagram, X e Facebook | Do próprio site |
+| Músicas | YouTube Music e SoundCloud | Do próprio site |
+| Músicas | Spotify, Deezer e Apple Music | Do YouTube Music |
+
+Spotify, Deezer e Apple Music protegem o áudio. O programa lê o nome da música e do artista no link e baixa a mesma música do YouTube Music, que pode ser outra versão. Playlists da Apple Music não funcionam.
+
+Outros sites compatíveis com o [yt-dlp](https://github.com/yt-dlp/yt-dlp) também costumam funcionar. Cada site muda com o tempo, então a compatibilidade não é garantida.
 
 ![A mesma tela no tema escuro](docs/img/downloads-escuro.png)
 
@@ -33,7 +45,7 @@ Baixe somente conteúdo próprio ou que você tem autorização para usar. Você
 
 ## Privacidade
 
-O programa não tem conta, anúncios nem telemetria. Ao colar um link, ele consulta o site para mostrar as informações do vídeo. A [Política de Privacidade](src/legal.md) descreve o que fica no seu computador e o que acessa a internet.
+O programa não tem conta, anúncios nem telemetria. Ao colar um link, ele consulta o site para mostrar as informações do vídeo. Em links do Spotify, Deezer e Apple Music, ele consulta o serviço e envia o nome da música ao YouTube Music. A [Política de Privacidade](src/legal.md) descreve o que fica no seu computador e o que acessa a internet.
 
 ## Para desenvolver
 
@@ -61,6 +73,8 @@ Para testar sem mexer na instalação real, defina `DOWNLOADER_HOME` e `DOWNLOAD
 | `src\Setup.cs` | Instalação, desinstalação e componentes embutidos |
 | `src\Errors.cs` | Catálogo de erros, registro técnico e relatório |
 | `src\Estimate.cs` | Cálculo do tamanho antes de baixar |
+| `src\Music.cs` | Leitura de links do Spotify, Deezer e Apple Music |
+| `src\Browsers.cs` | Navegadores instalados e abertos |
 | `src\MainWindow.xaml` | Telas e estilos |
 | `src\ajuda.md`, `src\legal.md` | Textos da Ajuda e de Termos e políticas |
 | `CHANGELOG.md` | Texto de Novidades. O build exige uma seção para a versão compilada |

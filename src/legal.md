@@ -22,17 +22,19 @@ Estes termos podem mudar em versões futuras do programa. O texto que vale é o 
 ### Contato
 {{CONTACT}}
 
-## Política de Privacidade | Vigente a partir da versão 1.6.0
+## Política de Privacidade | Vigente a partir da versão 1.7.0
 Esta política descreve como o Downloader trata dados, conforme o funcionamento desta versão. O programa não tem conta de usuário, anúncios nem telemetria.
 ### O que fica no seu computador
 Nada abaixo é enviado ao publicador pelo programa.
-- **Opções:** tipo, qualidade, formatos, login escolhido, pasta de destino, caminho do arquivo de cookies, tema e tamanho da janela, em %APPDATA%\Downloader\config.ini.
+- **Opções:** tipo, qualidade, formatos, login escolhido, navegador dos links, pasta de destino, caminho do arquivo de cookies, tema e tamanho da janela, em %APPDATA%\Downloader\config.ini.
+- **Navegadores:** para listar os navegadores, o programa consulta os instalados no Windows e quais estão abertos. Essa lista não é gravada.
 - **Biblioteca:** link, título, site, canal, data, opções, caminho dos arquivos e miniatura de cada download, em %APPDATA%\Downloader. O registro fica até você removê-lo.
 - **Registro técnico:** erros e informações de diagnóstico, com o link sem parâmetros, em %APPDATA%\Downloader\logs. São mantidos os arquivos dos três meses mais recentes. Parâmetros e fragmentos de links, usuário e senha embutidos em links, nome de usuário do Windows, endereços IP e dados com aparência de senha, cookie ou token são removidos antes da gravação, por filtros automáticos. Esses filtros reduzem o risco, mas podem não reconhecer todo tipo de dado.
 - **Arquivos temporários:** os arquivos de cada download ficam em %TEMP%\Downloader e são apagados ao concluir ou cancelar, ou na próxima abertura do programa. Miniaturas ficam nessa mesma pasta como cache, por até 30 dias.
 ### Conexões com a internet
 O programa acessa a internet para funcionar. Nessas conexões, os sites recebem dados comuns de navegação, como o seu endereço IP.
 - **Sites dos links:** ao colar um link, o programa consulta o site para mostrar título, miniatura e tamanho. Ao baixar, ele acessa o mesmo site.
+- **Spotify, Deezer e Apple Music:** o programa envia o link ao serviço para ler o nome das músicas e dos artistas. Depois, envia esses nomes ao YouTube Music para buscar e baixar a música.
 - **Sugestões:** o programa consulta os canais que você mais baixa para listar vídeos recentes.
 - **Atualização:** ao abrir, o componente yt-dlp verifica se há versão nova em seu serviço de distribuição e se atualiza.
 Cada site trata esses dados conforme a política dele.

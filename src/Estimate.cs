@@ -10,7 +10,8 @@ namespace Downloader
         public int Height;
         public double? File, Approx, Part0, Part1, Tbr, Abr, Asr;
         public bool HasVideo;
-        public string Site, Thumb, ChannelUrl, Channel, Title;
+        public string Site, Thumb, ChannelUrl, Channel, Title, Note;
+        public int Count;
 
         public const string Template =
             "PREVIEW|%(duration|)s|%(live_status|)s|%(height|)s|%(playlist_index|)s|%(filesize|)s|%(filesize_approx|)s" +

@@ -1,3 +1,16 @@
+## 1.7.0 | 2026-11-03
+### Novidades
+- Músicas do YouTube Music e do SoundCloud, baixadas do próprio site.
+- Músicas, álbuns e playlists do Spotify e do Deezer, e músicas e álbuns da Apple Music. Esses serviços protegem o áudio, então o programa encontra a mesma música no YouTube Music e baixa de lá.
+- Álbuns e playlists entram na fila com uma linha por música.
+- Links de música baixam só o áudio, em MP3, com artista e título no nome do arquivo.
+- Escolha do navegador que abre os links, na barra lateral. Os navegadores abertos aparecem primeiro, e por padrão o programa pergunta antes de abrir.
+- Login com Brave, Opera e Vivaldi em Conteúdo restrito.
+### Melhorias
+- Sites compatíveis mais claros: lista na tela inicial e tópico novo na Ajuda, dizendo de onde vem cada arquivo.
+- O menu de Conteúdo restrito mostra só os navegadores instalados e marca os que estão abertos.
+- Cada linha mostra o serviço de origem, como “Spotify · via YouTube Music”.
+
 ## 1.6.1 | 2026-10-31
 ### Correções
 - Vídeos diferentes com o mesmo título não se sobrescrevem mais: o segundo é salvo com o identificador no nome.

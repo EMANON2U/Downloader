@@ -1,6 +1,6 @@
 # Começar
 ## Como baixar | Do link ao arquivo na pasta, em quatro passos
-1. Copie o link do vídeo (o passo a passo está em **Copiar o link**, neste índice).
+1. Copie o link do vídeo ou da música (o passo a passo está em **Copiar o link**, neste índice).
 2. Cole na caixa do topo. O título, a miniatura e o tamanho aparecem logo abaixo.
 3. Escolha as opções, se quiser. As que já vêm marcadas servem para a maioria dos casos. Passe o mouse sobre um botão ou ícone para ver o que ele faz.
 4. Clique em **Baixar** ou aperte **Ctrl+Enter**.
@@ -33,6 +33,21 @@ Só o trecho é baixado, não o vídeo inteiro. O arquivo recebe o intervalo no 
 O trecho vale para um link por vez e não funciona em transmissão ao vivo. Ao pausar, ele recomeça do início quando você continuar.
 
 # Copiar o link
+## Sites compatíveis | O que funciona e de onde vem o arquivo
+**Vídeos, baixados do próprio site:**
+- **YouTube:** vídeos, Shorts e transmissões.
+- **TikTok, Instagram, X (Twitter) e Facebook:** publicações com vídeo.
+**Músicas, baixadas do próprio site:**
+- **YouTube Music:** músicas e clipes.
+- **SoundCloud:** faixas públicas.
+**Músicas encontradas no YouTube Music:**
+- **Spotify:** músicas, álbuns e playlists.
+- **Deezer:** músicas, álbuns e playlists.
+- **Apple Music:** músicas e álbuns. Playlists não funcionam.
+Esses três serviços protegem o áudio e não permitem baixá-lo. O programa lê o nome da música e do artista no link e baixa a mesma música do YouTube Music. A versão pode ser diferente, como uma remasterização. Confira o título na linha do download.
+Links de música baixam só o áudio, em MP3, com o nome do artista e da música no arquivo. Para outro formato, mude na linha do download antes de começar.
+Muitos outros sites de vídeo também funcionam. Cole o link e veja: se o site não for compatível, o programa avisa.
+
 ## YouTube | Vídeos, Shorts e transmissões
 1. Abra o vídeo e clique em **Compartilhar**, depois em **Copiar**. Também vale copiar o endereço da barra do navegador.
 2. Cole no Downloader.
@@ -53,6 +68,16 @@ Publicações públicas não precisam de login. Algumas com conteúdo sensível 
 2. Cole no Downloader.
 O Instagram costuma pedir login, principalmente depois de alguns downloads seguidos. Se isso acontecer, veja “Conteúdo restrito e login”. Perfis privados só funcionam se a sua conta segue o perfil.
 
+## Spotify, Deezer e Apple Music | Músicas, álbuns e playlists
+1. No aplicativo ou no site, abra a música, o álbum ou a playlist e toque em **Compartilhar** e em **Copiar link**.
+2. Cole no Downloader. Álbuns e playlists viram uma linha por música na fila.
+Playlists privadas não funcionam. No Spotify, playlists muito longas podem vir só com as primeiras músicas.
+
+## YouTube Music e SoundCloud | Músicas
+1. Abra a música, toque em **Compartilhar** e em **Copiar link**.
+2. Cole no Downloader.
+O arquivo vem do próprio site. No SoundCloud, faixas pagas ou só para assinantes não funcionam.
+
 ## Outros sites | Facebook e demais
 O Downloader funciona com muitos outros sites de vídeo, e o Facebook já foi testado. Cole o link e veja se baixa: não é possível garantir todos, porque cada site muda com o tempo. Se o site não for compatível, o programa avisa.
 
@@ -60,7 +85,8 @@ O Downloader funciona com muitos outros sites de vídeo, e o Facebook já foi te
 ## Conteúdo restrito e login | Quando o site exige uma conta
 Primeiro o programa tenta baixar sem login. Só se o site pedir, ele usa a opção escolhida em **Conteúdo restrito**, o botão do cadeado. Seu login nunca é enviado a nós nem registrado nos diagnósticos: ele só é usado para falar com o próprio site.
 **Firefox (recomendado):** faça login no site pelo Firefox e escolha Firefox. Funciona mesmo com o navegador aberto.
-**Chrome e Edge:** no Windows, esses navegadores protegem o login salvo, e o programa pode não conseguir ler. Fechar o navegador às vezes ajuda no erro de bloqueio, mas não resolve quando a proteção do navegador impede a leitura. Nesse caso, use o Firefox ou um arquivo de cookies.
+**Chrome, Edge, Brave, Opera e Vivaldi:** no Windows, esses navegadores protegem o login salvo, e o programa pode não conseguir ler. Fechar o navegador às vezes ajuda no erro de bloqueio, mas não resolve quando a proteção do navegador impede a leitura. Nesse caso, use o Firefox ou um arquivo de cookies.
+O menu do cadeado mostra só os navegadores instalados neste PC e marca os que estão abertos.
 **Arquivo de cookies:**
 1. No navegador, instale uma extensão que exporte cookies no formato Netscape (cookies.txt), de um desenvolvedor em quem você confie.
 2. Entre no site e exporte os cookies para um arquivo.
@@ -82,6 +108,12 @@ O registro técnico fica neste PC, em **Registros de diagnóstico**, no topo des
 ## Aparência e janela | Tema e tamanho
 Na barra lateral, escolha o tema: **do Windows**, **claro** ou **escuro**. As janelas de aviso do próprio Windows continuam no tema dele.
 Redimensione a janela como quiser: o tamanho fica salvo, e em janelas estreitas a barra lateral mostra só os ícones.
+
+## Navegador dos links | Onde abrem títulos e links
+Na barra lateral, em **Abrir links no**, escolha o navegador. Os que estão abertos aparecem primeiro, marcados como “aberto”.
+- **Perguntar sempre:** a cada link, o programa mostra os navegadores e você escolhe. É o padrão: nada abre sozinho.
+- **Um navegador da lista:** os links abrem sempre nele.
+- **Padrão do Windows:** usa o navegador configurado no Windows.
 
 ## Uso responsável | O que você pode baixar
 > Baixe só o que é seu ou o que você tem autorização para usar. Os termos de alguns sites proíbem o download, e o conteúdo pode ter direitos autorais.

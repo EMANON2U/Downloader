@@ -31,6 +31,9 @@ namespace Downloader
                 case "firefox": return "Firefox";
                 case "chrome": return "Chrome";
                 case "edge": return "Edge";
+                case "brave": return "Brave";
+                case "opera": return "Opera";
+                case "vivaldi": return "Vivaldi";
                 case "file": return "arquivo de cookies";
                 default: return "navegador";
             }
@@ -45,7 +48,20 @@ namespace Downloader
                 case "firefox": return Directory.Exists(Path.Combine(roam, @"Mozilla\Firefox\Profiles"));
                 case "chrome": return Directory.Exists(Path.Combine(local, @"Google\Chrome\User Data"));
                 case "edge": return Directory.Exists(Path.Combine(local, @"Microsoft\Edge\User Data"));
+                case "brave": return Directory.Exists(Path.Combine(local, @"BraveSoftware\Brave-Browser\User Data"));
+                case "opera": return Directory.Exists(Path.Combine(roam, @"Opera Software\Opera Stable"));
+                case "vivaldi": return Directory.Exists(Path.Combine(local, @"Vivaldi\User Data"));
                 default: return true;
+            }
+        }
+
+        public static bool BrowserRunning(string key)
+        {
+            switch (key)
+            {
+                case "firefox": case "chrome": case "brave": case "opera": case "vivaldi": return Browsers.IsRunning(key);
+                case "edge": return Browsers.IsRunning("msedge");
+                default: return false;
             }
         }
 
@@ -178,6 +194,21 @@ namespace Downloader
         {
             return Make("DISK-604", "disco", "Não consegui acessar a pasta de destino",
                 Sanitize(dest) + " não está disponível. O disco ou a pasta de rede pode ter sido desconectado.", "Reconecte o disco ou troque a pasta em “Alterar”.");
+        }
+        public static ErrorInfo MusicLookup(string service, Exception ex)
+        {
+            var m = ex as MusicError;
+            if (m != null && m.Unsupported)
+                return Make("LINK-303", "musica", "Este link do " + service + " não é compatível", m.Message,
+                    "Copie o link de uma música, álbum ou playlist pelo botão Compartilhar.", "edit", "Corrigir o link");
+            return Make("MUSIC-801", "musica", "Não consegui ler a música no " + service,
+                m != null ? m.Message : "O " + service + " não respondeu.", "Confira se o link abre no navegador e tente de novo.");
+        }
+        public static ErrorInfo MusicNotFound()
+        {
+            return Make("MUSIC-802", "musica", "Não encontrei esta música no YouTube Music",
+                "O Spotify, o Deezer e a Apple Music não liberam o áudio, então o programa procura a mesma música no YouTube Music, e ela não apareceu.",
+                "Procure a música no YouTube Music e cole o link de lá.");
         }
         public static ErrorInfo FileMissing()
         {

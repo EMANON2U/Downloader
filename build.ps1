@@ -1,4 +1,4 @@
-param([string]$Version = '1.6.1',[string]$ReportUrl = '', [string]$SupportContact = 'contato.resoup@gmail.com')
+param([string]$Version = '1.7.0',[string]$ReportUrl = '', [string]$SupportContact = 'contato.resoup@gmail.com')
 $ErrorActionPreference = 'Stop'
 
 $Product = 'Downloader'
@@ -65,8 +65,8 @@ foreach ($p in $payload) { $res += "/resource:$obj\bin\$($p[0]).gz,bin/$($p[0]).
     /win32icon:"$root\icon\downloader.ico" /win32manifest:"$root\src\app.manifest" `
     $res `
     /r:"$fw\WPF\PresentationFramework.dll" /r:"$fw\WPF\PresentationCore.dll" /r:"$fw\WPF\WindowsBase.dll" `
-    /r:System.Xaml.dll /r:System.dll /r:System.Core.dll `
-    "$root\src\App.cs" "$root\src\Setup.cs" "$root\src\Errors.cs" "$root\src\Estimate.cs" "$obj\Version.cs"
+    /r:System.Xaml.dll /r:System.dll /r:System.Core.dll /r:System.Web.Extensions.dll `
+    "$root\src\App.cs" "$root\src\Setup.cs" "$root\src\Errors.cs" "$root\src\Estimate.cs" "$root\src\Music.cs" "$root\src\Browsers.cs" "$obj\Version.cs"
 if ($LASTEXITCODE -ne 0) { throw 'Falha na compilacao' }
 Copy-Item "$obj\THIRD-PARTY-NOTICES.txt" $rel -Force
 Write-Host ("OK: $exe ({0:N1} MB)" -f ((Get-Item $exe).Length / 1MB))

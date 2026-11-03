@@ -57,6 +57,9 @@ namespace Downloader
             new[] { "firefox", "Firefox", "Firefox · recomendado" },
             new[] { "chrome", "Chrome", "Chrome · pode ser bloqueado pelo navegador" },
             new[] { "edge", "Edge", "Edge · pode ser bloqueado pelo navegador" },
+            new[] { "brave", "Brave", "Brave · pode ser bloqueado pelo navegador" },
+            new[] { "opera", "Opera", "Opera · pode ser bloqueado pelo navegador" },
+            new[] { "vivaldi", "Vivaldi", "Vivaldi · pode ser bloqueado pelo navegador" },
             new[] { "file", "Arquivo de cookies", "Arquivo de cookies (.txt)…" } };
         public static readonly string[][] Trims = {
             new[] { "full", "Vídeo completo", "Vídeo completo" },
@@ -80,6 +83,7 @@ namespace Downloader
         }
 
         public string Url;
+        public string Source;
         public string LastError;
         public string Height;
         public string Channel, ChannelUrl;
@@ -317,6 +321,7 @@ namespace Downloader
     public class Program
     {
         const string NameTemplate = "%(title).150B";
+        const string MusicTemplate = "%(artist,uploader).80B - %(track,title).150B";
         const int MaxPreviews = 8;
         const int UpdateTimeoutMs = 45000, ToolTimeoutMs = 30000, PreviewTimeoutMs = 60000, SuggestTimeoutMs = 60000, KillWaitMs = 10000;
         const int ThumbTimeoutMs = 20000, ThumbMaxBytes = 10 * 1024 * 1024, ThumbCacheDays = 30;
@@ -367,6 +372,8 @@ namespace Downloader
         static CheckBox trimExactBox;
         static Button downloadBtn;
         static string cookieFile;
+        static string linkBrowser = "";
+        static Button clicked;
         static string seenVersion;
         static ErrorInfo sheetError;
         static RadioButton tabDownloads, tabLibrary, tabHelp, tabNews, tabLegal;
@@ -540,6 +547,9 @@ namespace Downloader
             downloadBtn.Click += (s, e) => AddLinks();
             ((Button)win.FindName("FolderBtn")).Click += (s, e) => OpenFolder(null);
             ((Button)win.FindName("ChangeDestBtn")).Click += (s, e) => PickDest();
+            var browserBtn = (Button)win.FindName("BrowserBtn");
+            browserBtn.Click += (s, e) => ShowBrowserMenu(browserBtn);
+            ((Button)win.FindName("SitesBtn")).Click += (s, e) => ShowPage("help", "Sites compatíveis");
             pauseAllBtn = (Button)win.FindName("PauseAllBtn");
             pauseAllBtn.Click += (s, e) => TogglePauseAll();
             ((Button)win.FindName("ClearBtn")).Click += (s, e) =>
@@ -565,6 +575,7 @@ namespace Downloader
             {
                 LoadHistory();
                 UpdateDestText();
+                UpdateBrowserText();
                 UpdateEmpty();
                 UpdateInputState();
                 UpdateLayoutMode();
@@ -768,7 +779,10 @@ namespace Downloader
             var links = tokens.Where(IsLink).ToList();
             int bad = tokens.Length - links.Count;
 
-            SetHint(linkHint, bad > 0 ? "Há texto que não parece link: ele não será baixado e fica na caixa." : "", bad > 0);
+            string musicNote = "";
+            if (links.Any(Music.IsMusic) && defaults.Kind != "audio") musicNote = "Links de música baixam só o áudio, em MP3. ";
+            if (links.Any(Music.NeedsSearch)) musicNote += "Spotify, Deezer e Apple Music não liberam o áudio: o programa procura a mesma música no YouTube Music e baixa de lá.";
+            SetHint(linkHint, bad > 0 ? "Há texto que não parece link: ele não será baixado e fica na caixa." : musicNote.Trim(), bad > 0);
 
             bool part = defaults.TrimMode == "part";
             string trimProblem = null;
@@ -803,15 +817,25 @@ namespace Downloader
             else { previewTimer.Stop(); previewTimer.Start(); }
         }
 
-        static string PreviewArgs()
+        static Item OptionsFor(string url)
         {
-            string sel = SelectArgs(defaults);
-            if (defaults.Kind == "split") sel = sel.Replace("\"bv/bv*/b\"", "\"bv+ba/b\"");
-            if (defaults.Kind == "audio" && defaults.Fmt == "m4a") sel += "-S \"acodec:aac\" ";
+            if (!Music.IsMusic(url) || defaults.Kind == "audio") return defaults;
+            var o = new Item();
+            o.CopyOptions(defaults);
+            o.Kind = "audio";
+            return o;
+        }
+
+        static string PreviewArgs(string url)
+        {
+            var o = OptionsFor(url);
+            string sel = SelectArgs(o);
+            if (o.Kind == "split") sel = sel.Replace("\"bv/bv*/b\"", "\"bv+ba/b\"");
+            if (o.Kind == "audio" && o.Fmt == "m4a") sel += "-S \"acodec:aac\" ";
             return sel;
         }
 
-        static string PreviewKey(string url) { return url + "|" + PreviewArgs(); }
+        static string PreviewKey(string url) { return url + "|" + PreviewArgs(url); }
 
         static void SyncPreviews()
         {
@@ -848,31 +872,53 @@ namespace Downloader
             previewKilled = false;
             previewKey = PreviewKey(next.Url);
             string key = previewKey;
-            string args = "--simulate --no-warnings --playlist-items 1 " + PreviewArgs() + ToolArgs(new Item()) +
-                          "--print " + Args.Quote(ProbeData.Template) + " " + Args.Quote(next.Url);
+            string url = next.Url;
+            string args = "--simulate --no-warnings --playlist-items 1 " + PreviewArgs(url) + ToolArgs(new Item()) +
+                          "--print " + Args.Quote(ProbeData.Template) + " ";
             ThreadPool.QueueUserWorkItem(_ =>
             {
                 ProbeData data = null;
-                string error = null;
+                MusicList list = null;
+                string error = null, note = null;
                 try
                 {
-                    var p = Run(Path.Combine(Bin, "yt-dlp.exe"), args);
-                    previewProc = p;
-                    p.OutputDataReceived += (s, e) => { if (e.Data != null && e.Data.StartsWith("PREVIEW|")) data = ProbeData.Parse(e.Data); };
-                    p.ErrorDataReceived += (s, e) => { if (e.Data != null && e.Data.StartsWith("ERROR:")) error = e.Data.Substring(6).Trim(); };
-                    p.BeginOutputReadLine();
-                    p.BeginErrorReadLine();
-                    if (!p.WaitForExit(PreviewTimeoutMs)) { KillTree(p); p.WaitForExit(KillWaitMs); }
-                    else p.WaitForExit();
+                    string target = url;
+                    if (Music.NeedsSearch(url))
+                    {
+                        try { list = Music.Resolve(url); }
+                        catch (MusicError ex) { note = ex.Unsupported ? "Link não compatível" : "Não consegui ler no " + Music.Service(url); throw; }
+                        target = list.Collection ? null : Music.SearchUrl(list.Tracks[0]);
+                    }
+                    if (target != null && !previewKilled)
+                    {
+                        var p = Run(Path.Combine(Bin, "yt-dlp.exe"), args + Args.Quote(target));
+                        previewProc = p;
+                        p.OutputDataReceived += (s, e) => { if (e.Data != null && e.Data.StartsWith("PREVIEW|")) data = ProbeData.Parse(e.Data); };
+                        p.ErrorDataReceived += (s, e) => { if (e.Data != null && e.Data.StartsWith("ERROR:")) error = e.Data.Substring(6).Trim(); };
+                        p.BeginOutputReadLine();
+                        p.BeginErrorReadLine();
+                        if (!p.WaitForExit(PreviewTimeoutMs)) { KillTree(p); p.WaitForExit(KillWaitMs); }
+                        else p.WaitForExit();
+                        if (list != null && data == null) note = "Não encontrei no " + Music.Via;
+                    }
                 }
                 catch (Exception ex) { error = ex.Message; }
+                if (list != null && (data != null || list.Collection))
+                {
+                    if (data == null) data = new ProbeData();
+                    data.Playlist = list.Collection;
+                    data.Count = list.Collection ? list.Tracks.Count : 0;
+                    data.Title = list.Collection ? list.Name : list.Tracks[0].Name;
+                    data.Site = Music.SiteLabel(list.Service);
+                    if (list.Thumb != null) data.Thumb = list.Thumb;
+                }
                 Ui(() =>
                 {
                     previewBusy = false;
                     previewProc = null;
                     if (!previewKilled)
                     {
-                        if (data == null) data = new ProbeData { Failed = true, NeedsLogin = error != null && Errors.NeedsLogin(error) };
+                        if (data == null) data = new ProbeData { Failed = true, NeedsLogin = error != null && Errors.NeedsLogin(error), Note = note };
                         probeCache[key] = data;
                         RefreshPreviewSizes();
                     }
@@ -912,7 +958,7 @@ namespace Downloader
                 if (!d.Failed)
                 {
                     if (!string.IsNullOrEmpty(d.Title) && d.Title != "NA") p.Title = d.Title;
-                    if (!string.IsNullOrEmpty(d.Site) && d.Site != "NA") p.Site = d.Site;
+                    if (!string.IsNullOrEmpty(d.Site) && d.Site != "NA") p.Site = Music.IsMusic(p.Url) && !Music.NeedsSearch(p.Url) ? Music.Service(p.Url) : d.Site;
                     if (d.ChannelUrl != null && d.ChannelUrl.StartsWith("http")) p.ChannelUrl = d.ChannelUrl;
                     if (!string.IsNullOrEmpty(d.Channel) && d.Channel != "NA") p.Channel = d.Channel;
                     p.Duration = d.Duration > 0 && !d.Playlist ? TimeText.Format(d.Duration) : "";
@@ -923,7 +969,8 @@ namespace Downloader
                         FetchThumb(d.Thumb, f => target.Thumb = f);
                     }
                 }
-                p.Size = Estimate.For(d, defaults.Kind, defaults.Fmt, defaults.AudioFmt, part ? start : null, part ? end : null, exact);
+                var o = OptionsFor(p.Url);
+                p.Size = Estimate.For(d, o.Kind, o.Fmt, o.AudioFmt, part ? start : null, part ? end : null, exact);
                 if (p.Size != null)
                 {
                     p.SizeText = p.Size.Text;
@@ -933,7 +980,8 @@ namespace Downloader
                 else
                 {
                     anyUnknown = true;
-                    p.SizeText = d.NeedsLogin ? "Exige login" : d.Live ? "Ao vivo" : d.Playlist ? "Vários vídeos" : "Tamanho desconhecido";
+                    p.SizeText = d.Note ?? (d.NeedsLogin ? "Exige login" : d.Live ? "Ao vivo" : d.Count > 0 ? d.Count + (d.Count == 1 ? " música" : " músicas")
+                        : d.Playlist ? "Vários vídeos" : "Tamanho desconhecido");
                 }
             }
 
@@ -955,7 +1003,64 @@ namespace Downloader
         static void OpenLink(string url)
         {
             if (!IsLink(url)) return;
+            if (linkBrowser == "system") { OpenWithWindows(url); return; }
+            var found = Browsers.Find();
+            var chosen = found.FirstOrDefault(b => b.Key == linkBrowser);
+            if (chosen != null && TryOpen(chosen, url)) return;
+
+            CloseMenu();
+            var menu = NewMenu(clicked != null && clicked.IsVisible ? clicked : (UIElement)win, clicked != null && clicked.IsVisible ? PlacementMode.Bottom : PlacementMode.Center);
+            menu.Items.Add(new MenuItem { Header = found.Count > 0 ? "Abrir o link no navegador:" : "Nenhum navegador encontrado", IsEnabled = false, Style = (Style)win.FindResource("MenuEntry") });
+            foreach (var b in found)
+            {
+                var target = b;
+                AddEntry(menu, target.Label, false, () => TryOpen(target, url));
+            }
+            AddEntry(menu, "Navegador padrão do Windows", false, () => OpenWithWindows(url));
+            menu.IsOpen = true;
+        }
+
+        static bool TryOpen(BrowserInfo b, string url)
+        {
+            try { Browsers.Open(b, url); return true; }
+            catch { return false; }
+        }
+
+        static void OpenWithWindows(string url)
+        {
             try { Process.Start(url); } catch { }
+        }
+
+        static void ShowBrowserMenu(Button anchor)
+        {
+            CloseMenu();
+            var menu = NewMenu(anchor, PlacementMode.Top);
+            AddEntry(menu, "Perguntar sempre", linkBrowser == "", () => SetLinkBrowser(""));
+            foreach (var b in Browsers.Find())
+            {
+                string key = b.Key;
+                AddEntry(menu, b.Label, linkBrowser == key, () => SetLinkBrowser(key));
+            }
+            AddEntry(menu, "Navegador padrão do Windows", linkBrowser == "system", () => SetLinkBrowser("system"));
+            menu.IsOpen = true;
+        }
+
+        static void SetLinkBrowser(string key)
+        {
+            linkBrowser = key;
+            SaveConfig();
+            UpdateBrowserText();
+        }
+
+        static void UpdateBrowserText()
+        {
+            string text = linkBrowser == "" ? "Perguntar sempre" : linkBrowser == "system" ? "Padrão do Windows" : null;
+            if (text == null)
+            {
+                var b = Browsers.Find().FirstOrDefault(x => x.Key == linkBrowser);
+                text = b != null ? b.Name : "Perguntar sempre";
+            }
+            ((TextBlock)win.FindName("BrowserText")).Text = text;
         }
 
         static void PasteLinks()
@@ -988,7 +1093,7 @@ namespace Downloader
                 if (!active.Add(VideoKey(u))) { skipped++; continue; }
                 var it = new Item { Url = u, Title = u, Site = SiteName(u), Status = "Na fila", State = "fila", TrimStart = start, TrimEnd = end };
                 it.TrimExact = trimExactBox.IsChecked == true;
-                it.CopyOptions(defaults);
+                it.CopyOptions(OptionsFor(u));
                 var seen = previews.FirstOrDefault(p => p.Url == u);
                 if (seen != null)
                 {
@@ -1143,6 +1248,7 @@ namespace Downloader
             it.DestDir = Dest;
             try { Directory.CreateDirectory(it.DestDir); } catch { }
             if (!Directory.Exists(it.DestDir)) { it.Preflight = Errors.DestUnavailable(it.DestDir); return -1; }
+            if (it.Source == null && Music.NeedsSearch(it.Url) && !ResolveMusic(it)) return -1;
 
             int code = -1;
             for (int attempt = 0; attempt < 2; attempt++)
@@ -1164,11 +1270,63 @@ namespace Downloader
             return code;
         }
 
+        static bool ResolveMusic(Item it)
+        {
+            string service = Music.Service(it.Url);
+            Ui(() => it.Status = "Lendo as músicas no " + service + "…");
+            MusicList list;
+            try { list = Music.Resolve(it.Url); }
+            catch (Exception ex)
+            {
+                it.LastError = ex.Message;
+                it.Preflight = Errors.MusicLookup(service, ex);
+                return false;
+            }
+            win.Dispatcher.Invoke(new Action(() => ExpandMusic(it, list)));
+            return true;
+        }
+
+        static void ExpandMusic(Item it, MusicList list)
+        {
+            var rest = queue.ToList();
+            queue.Clear();
+            int at = items.IndexOf(it);
+            for (int i = 0; i < list.Tracks.Count; i++)
+            {
+                var t = list.Tracks[i];
+                var x = it;
+                if (i > 0)
+                {
+                    x = new Item { Status = "Na fila", State = "fila" };
+                    x.CopyOptions(it);
+                    items.Insert(at < 0 ? items.Count : Math.Min(items.Count, at + i), x);
+                    queue.Enqueue(x);
+                }
+                x.Url = t.Url;
+                x.Source = Music.SearchUrl(t);
+                x.Title = t.Name;
+                x.Site = Music.SiteLabel(list.Service);
+                if (t.Thumb != null && t.Thumb != x.ThumbUrl)
+                {
+                    var target = x;
+                    target.ThumbUrl = t.Thumb;
+                    FetchThumb(t.Thumb, f => target.Thumb = f);
+                }
+            }
+            foreach (var q in rest) queue.Enqueue(q);
+            UpdateTaskbar();
+        }
+
+        static string Target(Item it)
+        {
+            return it.Source == null ? Args.Quote(it.Url) : "--playlist-items 1 " + Args.Quote(it.Source);
+        }
+
         static int Probe(Item it)
         {
             string args = "--simulate --no-warnings " + SelectArgs(it) + ToolArgs(it) +
                 "--print \"video:INFO|%(extractor_key)s|%(thumbnail)s|%(channel_url,uploader_url|)s|%(channel,uploader|)s|%(title)s\" " +
-                "--print \"PROBE|%(duration|)s|%(live_status|)s|%(height|)s\" " + Args.Quote(it.Url);
+                "--print \"PROBE|%(duration|)s|%(live_status|)s|%(height|)s\" " + Target(it);
             it.ProbeDuration = 0; it.ProbeLive = null; it.ProbeHeight = null;
             int code = Pump(it, args);
             if (code != 0 || it.Cancelled || it.Paused) return code;
@@ -1225,7 +1383,7 @@ namespace Downloader
         {
             var steps = new List<string[]>();
             bool mp4 = it.Fmt == "mp4";
-            string name = NameTemplate + TrimSuffix(it) + (it.UseId ? " [%(id)s]" : "");
+            string name = (Music.IsMusic(it.Url) ? MusicTemplate : NameTemplate) + TrimSuffix(it) + (it.UseId ? " [%(id)s]" : "");
 
             if (it.Kind == "video")
             {
@@ -1310,7 +1468,8 @@ namespace Downloader
             a.Append("--print \"video:INFO|%(extractor_key)s|%(thumbnail)s|%(channel_url,uploader_url|)s|%(channel,uploader|)s|%(title)s\" ");
             a.Append("--print \"after_move:OK|%(height|)s|%(filepath)s\" ");
             a.Append("--progress-template \"download:PCT|%(progress._percent_str)s|%(progress._speed_str)s|%(progress._eta_str)s\" ");
-            a.Append(Args.Quote(it.Url));
+            if (Music.IsMusic(it.Url) && it.Kind == "audio") a.Append("--embed-metadata ");
+            a.Append(Target(it));
             return a.ToString();
         }
 
@@ -1410,15 +1569,18 @@ namespace Downloader
                 var c = line.Split(new[] { '|' }, 6);
                 if (c.Length == 6)
                 {
-                    it.Site = c[1] == "Youtube" ? "YouTube" : c[1];
-                    if (c[2].StartsWith("http") && c[2] != it.ThumbUrl)
+                    if (it.Source == null)
                     {
-                        it.ThumbUrl = c[2];
-                        FetchThumb(c[2], f => it.Thumb = f);
+                        it.Site = Music.IsMusic(it.Url) ? Music.Service(it.Url) : c[1] == "Youtube" ? "YouTube" : c[1];
+                        if (c[2].StartsWith("http") && c[2] != it.ThumbUrl)
+                        {
+                            it.ThumbUrl = c[2];
+                            FetchThumb(c[2], f => it.Thumb = f);
+                        }
+                        it.Title = c[5];
                     }
                     if (c[3].StartsWith("http")) it.ChannelUrl = c[3];
                     if (c[4].Length > 0 && c[4] != "NA") it.Channel = c[4];
-                    it.Title = c[5];
                 }
             }
             else if (line.StartsWith("OK|"))
@@ -1481,7 +1643,7 @@ namespace Downloader
             }
             else
             {
-                var err = it.Preflight ?? (code == 0 ? Errors.FileMissing() : Errors.Classify(it.LastError, it.Login, it.UseCookies, it.HasTrim));
+                var err = it.Preflight ?? (code == 0 ? (it.Source != null && it.Files.Count == 0 ? Errors.MusicNotFound() : Errors.FileMissing()) : Errors.Classify(it.LastError, it.Login, it.UseCookies, it.HasTrim));
                 string tech = "Última mensagem: " + (it.LastError ?? "-") + "\nTipo: " + it.Kind + " | Qualidade: " + it.Quality + " | Formato: " + it.Fmt +
                               " | Login: " + it.Login + (it.UseCookies ? " (usado)" : " (não usado)") + " | " + (it.HasTrim ? it.TrimLabel + (it.TrimExact ? " exato" : " rápido") : "vídeo completo") +
                               "\nCódigo de saída: " + code + "\n" + string.Join("\n", it.Tail);
@@ -2133,6 +2295,7 @@ namespace Downloader
             if (b == null) return;
             string tag = b.Tag as string;
             if (tag == null) return;
+            clicked = b;
             var en = b.DataContext as Entry;
             if (en != null) { OnLibraryButton(en, tag); return; }
             var sg = b.DataContext as Suggestion;
@@ -2188,26 +2351,22 @@ namespace Downloader
             }
 
             CloseMenu();
-            var menu = new ContextMenu
-            {
-                Style = (Style)win.FindResource("Menu"),
-                PlacementTarget = b,
-                Placement = PlacementMode.Bottom,
-                VerticalOffset = -6,
-                HorizontalOffset = -10,
-                StaysOpen = false
-            };
-            menu.Closed += (s, e) => { if (openMenu == menu) openMenu = null; };
-            openMenu = menu;
+            var menu = NewMenu(b, PlacementMode.Bottom);
             var entry = (Style)win.FindResource("MenuEntry");
             foreach (var o in opts)
             {
                 string key = o[0];
                 var mi = new MenuItem { Header = o[2], IsChecked = key == cur, Style = entry };
-                if (field == "login" && !Errors.BrowserInstalled(key))
+                if (field == "login" && key != "none" && key != "file")
                 {
-                    mi.Header = Options.Label(Options.Logins, key) + " · não encontrado neste PC";
-                    mi.IsEnabled = false;
+                    if (!Errors.BrowserInstalled(key))
+                    {
+                        if (key != cur) continue;
+                        mi.Header = Options.Label(Options.Logins, key) + " · não encontrado neste PC";
+                        mi.IsEnabled = false;
+                    }
+                    else if (Errors.BrowserRunning(key))
+                        mi.Header = Options.Label(Options.Logins, key) + (key == "firefox" ? " · aberto · recomendado" : " · aberto: feche se o login falhar");
                 }
                 mi.Click += (s, e) =>
                 {
@@ -2230,6 +2389,29 @@ namespace Downloader
                 menu.Items.Add(mi);
             }
             menu.IsOpen = true;
+        }
+
+        static ContextMenu NewMenu(UIElement target, PlacementMode placement)
+        {
+            var menu = new ContextMenu
+            {
+                Style = (Style)win.FindResource("Menu"),
+                PlacementTarget = target,
+                Placement = placement,
+                VerticalOffset = placement == PlacementMode.Bottom ? -6 : 0,
+                HorizontalOffset = placement == PlacementMode.Bottom ? -10 : 0,
+                StaysOpen = false
+            };
+            menu.Closed += (s, e) => { if (openMenu == menu) openMenu = null; };
+            openMenu = menu;
+            return menu;
+        }
+
+        static void AddEntry(ContextMenu menu, string header, bool selected, Action click)
+        {
+            var mi = new MenuItem { Header = header, IsChecked = selected, Style = (Style)win.FindResource("MenuEntry") };
+            mi.Click += (s, e) => click();
+            menu.Items.Add(mi);
         }
 
         static void CloseMenu()
@@ -2313,6 +2495,8 @@ namespace Downloader
             var m = Regex.Match(url, @"^https?://(?:www\.|m\.)?([^/:]+)", RegexOptions.IgnoreCase);
             if (!m.Success) return "Link";
             string h = m.Groups[1].Value.ToLowerInvariant();
+            if (Music.NeedsSearch(url)) return Music.SiteLabel(Music.Service(url));
+            if (Music.IsMusic(url)) return Music.Service(url);
             if (h.Contains("youtu")) return "YouTube";
             if (h.Contains("instagram")) return "Instagram";
             if (h.Contains("tiktok")) return "TikTok";
@@ -2340,6 +2524,7 @@ namespace Downloader
                 if (cfg.TryGetValue("login", out v) && Options.Has(Options.Logins, v) && (v != "file" || cookieFile != null)) defaults.Login = v;
                 if (cfg.TryGetValue("afmt", out v) && Options.Has(Options.AudioFmts, v)) defaults.AudioFmt = v;
                 if (cfg.TryGetValue("dest", out v) && v.Length > 0) customDest = v;
+                if (cfg.TryGetValue("browser", out v)) linkBrowser = v;
                 if (cfg.TryGetValue("theme", out v) && (v == "light" || v == "dark" || v == "system")) themeMode = v;
                 if (cfg.TryGetValue("width", out v)) double.TryParse(v, NumberStyles.Float, CultureInfo.InvariantCulture, out savedWidth);
                 if (cfg.TryGetValue("height", out v)) double.TryParse(v, NumberStyles.Float, CultureInfo.InvariantCulture, out savedHeight);
@@ -2358,6 +2543,7 @@ namespace Downloader
                     "afmt=" + defaults.AudioFmt,
                     "dest=" + (customDest ?? ""),
                     "cookies=" + (cookieFile ?? ""),
+                    "browser=" + linkBrowser,
                     "seen=" + (seenVersion ?? ""),
                     "theme=" + themeMode,
                     "width=" + savedWidth.ToString(CultureInfo.InvariantCulture),
