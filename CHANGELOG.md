@@ -1,3 +1,8 @@
+## 1.8.2 | 2026-11-05
+### Correções
+- Mostrar sugestões traz as sugestões na hora, sem precisar trocar de tela. Se for preciso buscar de novo, o link mostra “Carregando sugestões…”.
+- Com downloads na lista, o link Mostrar sugestões aparece abaixo deles.
+
 ## 1.8.1 | 2026-11-05
 ### Correções
 - Os links da tela inicial (Sites compatíveis, Como copiar o link e Mostrar sugestões) voltaram a responder ao clique.

@@ -1,4 +1,4 @@
-param([string]$Version = '1.8.1',[string]$ReportUrl = '', [string]$SupportContact = 'contato.resoup@gmail.com')
+param([string]$Version = '1.8.2',[string]$ReportUrl = '', [string]$SupportContact = 'contato.resoup@gmail.com')
 $ErrorActionPreference = 'Stop'
 
 $Product = 'Downloader'

@@ -567,8 +567,9 @@ namespace Downloader
             ((Button)win.FindName("PlaylistOk")).Click += (s, e) => ConfirmPlaylist(true);
             ((Button)win.FindName("PlaylistCancel")).Click += (s, e) => ConfirmPlaylist(false);
             ((ListBox)win.FindName("PlaylistList")).PreviewMouseLeftButtonDown += (s, e) => ((RadioButton)win.FindName("PlaylistOne")).IsChecked = true;
-            ((Button)win.FindName("SuggestHide")).Click += (s, e) => { suggestOff = true; suggestions.Clear(); SaveConfig(); UpdateEmpty(); };
-            ((Button)win.FindName("SuggestShow")).Click += (s, e) => { suggestOff = false; suggestKey = null; SaveConfig(); UpdateEmpty(); RefreshSuggestions(null); };
+            ((Button)win.FindName("SuggestHide")).Click += (s, e) => { suggestOff = true; SaveConfig(); UpdateEmpty(); };
+            ((Button)win.FindName("SuggestShow")).Click += (s, e) => ShowSuggestions();
+            ((Button)win.FindName("SuggestShowRow")).Click += (s, e) => ShowSuggestions();
             pauseAllBtn = (Button)win.FindName("PauseAllBtn");
             pauseAllBtn.Click += (s, e) => TogglePauseAll();
             ((Button)win.FindName("ClearBtn")).Click += (s, e) =>
@@ -2228,9 +2229,18 @@ namespace Downloader
 
         static void UpdateEmpty()
         {
-            emptyHint.Visibility = items.Count == 0 && suggestions.Count == 0 && previews.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-            suggestPanel.Visibility = suggestions.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
-            ((FrameworkElement)win.FindName("SuggestShow")).Visibility = suggestOff && history.Any(h => IsLink(h.ChannelUrl)) ? Visibility.Visible : Visibility.Collapsed;
+            bool showSuggest = !suggestOff && suggestions.Count > 0;
+            emptyHint.Visibility = items.Count == 0 && !showSuggest && previews.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            suggestPanel.Visibility = showSuggest ? Visibility.Visible : Visibility.Collapsed;
+            bool loading = !suggestOff && suggestBusy && suggestions.Count == 0;
+            bool offer = (suggestOff || loading) && history.Any(h => IsLink(h.ChannelUrl));
+            foreach (var name in new[] { "SuggestShow", "SuggestShowRow" })
+            {
+                var b = (Button)win.FindName(name);
+                b.Content = loading ? "Carregando sugestões…" : "Mostrar sugestões";
+                b.IsEnabled = !loading;
+                b.Visibility = offer && (name == "SuggestShow") == (items.Count == 0) ? Visibility.Visible : Visibility.Collapsed;
+            }
             libEmpty.Text = history.Count == 0 ? "Nada na biblioteca ainda. Tudo que você baixar aparece aqui." : "Nada encontrado.";
             libEmpty.Visibility = libView.IsEmpty ? Visibility.Visible : Visibility.Collapsed;
         }
@@ -2464,6 +2474,18 @@ namespace Downloader
             }
         }
 
+        static void ShowSuggestions()
+        {
+            suggestOff = false;
+            SaveConfig();
+            if (suggestions.Count == 0)
+            {
+                suggestKey = null;
+                RefreshSuggestions(null);
+            }
+            UpdateEmpty();
+        }
+
         static void RefreshSuggestions(string firstChannel)
         {
             var top = history.Where(h => IsLink(h.ChannelUrl)).GroupBy(h => h.ChannelUrl)
@@ -2495,7 +2517,6 @@ namespace Downloader
                     suggestBusy = false;
                     suggestKey = key;
                     suggestions.Clear();
-                    if (suggestOff) return;
                     var have = new HashSet<string>(history.Select(h => VideoKey(h.Url)).Concat(items.Select(i => VideoKey(i.Url))).Concat(suggestGone));
                     for (int i = 0; suggestions.Count < 8 && lists.Any(l => i < l.Count); i++)
                         foreach (var l in lists)
@@ -2506,6 +2527,7 @@ namespace Downloader
                                 FetchThumb(sg.ThumbUrl, f => sg.Thumb = f);
                             }
                     suggestTitle.Text = chosen.Count == 1 ? "Mais de " + (chosen[0].Channel ?? chosen[0].Site) : "Sugestões dos canais que você mais baixa";
+                    UpdateEmpty();
                 });
             });
         }

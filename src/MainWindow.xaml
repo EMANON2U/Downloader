@@ -1190,6 +1190,7 @@
                                     </ItemsControl.ItemsPanel>
                                 </ItemsControl>
                             </StackPanel>
+                            <Button x:Name="SuggestShowRow" Style="{StaticResource Link}" Content="Mostrar sugestões" FontSize="12" HorizontalAlignment="Left" Margin="0,16,0,0" Visibility="Collapsed"/>
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>
