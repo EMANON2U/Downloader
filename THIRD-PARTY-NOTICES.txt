@@ -30,6 +30,16 @@ Deno {{DENO_VERSION}}
   permission notice shall be included in all copies or substantial portions of the
   Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
 
+gallery-dl {{GALLERYDL_VERSION}}
+  Licença: GNU General Public License v2 (texto completo no fim deste arquivo)
+  Copyright 2014-2026 Mike Fährmann
+  Site e código-fonte: https://github.com/mikf/gallery-dl  (tag v{{GALLERYDL_VERSION}})
+  Executável oficial: https://codeberg.org/mikf/gallery-dl/releases
+  Oferta de código-fonte: por três anos a partir da distribuição, o publicador do
+  Downloader envia a qualquer pessoa, pelo custo da mídia, uma cópia completa do
+  código-fonte correspondente a esta versão do gallery-dl. Peça pelo contato
+  informado em Termos e políticas.
+
 Uso responsável: baixe apenas conteúdo que você tem direito de usar. Os termos de
 alguns sites proíbem o download.
 

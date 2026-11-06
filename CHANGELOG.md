@@ -1,3 +1,13 @@
+## 1.8.0 | 2026-11-05
+### Novidades
+- Fotos do X (Twitter), do Instagram e de outros sites, incluindo carrosséis do Instagram com todas as imagens e vídeos.
+- Links de playlist perguntam o que baixar: a playlist inteira, com uma linha por vídeo, ou só um vídeo escolhido na lista.
+- Em links de vídeo dentro de uma playlist, o vídeo do link já vem marcado.
+- Sugestões de vídeos podem ser removidas uma a uma ou ocultadas de vez.
+### Melhorias
+- Sugestão baixada ou removida sai da tela e não volta na mesma sessão.
+- Com as sugestões ocultas, a tela inicial mostra o link para trazê-las de volta.
+
 ## 1.7.0 | 2026-11-03
 ### Novidades
 - Músicas do YouTube Music e do SoundCloud, baixadas do próprio site.

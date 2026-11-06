@@ -84,6 +84,7 @@ namespace Downloader
 
         public string Url;
         public string Source;
+        public bool Photos;
         public string LastError;
         public string Height;
         public string Channel, ChannelUrl;
@@ -236,6 +237,15 @@ namespace Downloader
                 return string.Join("  ·  ", parts);
             }
         }
+    }
+
+    public class PlaylistEntry
+    {
+        public string Url { get; set; }
+        public string Title { get; set; }
+        public string Time { get; set; }
+        public bool FromLink;
+        public override string ToString() { return Title; }
     }
 
     public class Suggestion : INotifyPropertyChanged
@@ -392,8 +402,12 @@ namespace Downloader
         static readonly ObservableCollection<Item> items = new ObservableCollection<Item>();
         static readonly ObservableCollection<Entry> history = new ObservableCollection<Entry>();
         static readonly ObservableCollection<Suggestion> suggestions = new ObservableCollection<Suggestion>();
-        static bool suggestBusy;
+        static bool suggestBusy, suggestOff;
         static string suggestKey;
+        static readonly HashSet<string> suggestGone = new HashSet<string>();
+        static readonly Queue<string> pendingPlaylists = new Queue<string>();
+        static string playlistUrl, playlistVideo;
+        const int MaxPlaylist = 1000, PlaylistTimeoutMs = 90000;
         static readonly Queue<Item> queue = new Queue<Item>();
         static Item current;
         static bool updating;
@@ -550,6 +564,11 @@ namespace Downloader
             var browserBtn = (Button)win.FindName("BrowserBtn");
             browserBtn.Click += (s, e) => ShowBrowserMenu(browserBtn);
             ((Button)win.FindName("SitesBtn")).Click += (s, e) => ShowPage("help", "Sites compatíveis");
+            ((Button)win.FindName("PlaylistOk")).Click += (s, e) => ConfirmPlaylist(true);
+            ((Button)win.FindName("PlaylistCancel")).Click += (s, e) => ConfirmPlaylist(false);
+            ((ListBox)win.FindName("PlaylistList")).PreviewMouseLeftButtonDown += (s, e) => ((RadioButton)win.FindName("PlaylistOne")).IsChecked = true;
+            ((Button)win.FindName("SuggestHide")).Click += (s, e) => { suggestOff = true; suggestions.Clear(); SaveConfig(); UpdateEmpty(); };
+            ((Button)win.FindName("SuggestShow")).Click += (s, e) => { suggestOff = false; suggestKey = null; SaveConfig(); UpdateEmpty(); RefreshSuggestions(null); };
             pauseAllBtn = (Button)win.FindName("PauseAllBtn");
             pauseAllBtn.Click += (s, e) => TogglePauseAll();
             ((Button)win.FindName("ClearBtn")).Click += (s, e) =>
@@ -563,7 +582,8 @@ namespace Downloader
                 {
                     var err = (FrameworkElement)win.FindName("ErrorSheet");
                     var page = (FrameworkElement)win.FindName("PagePanel");
-                    if (err.Visibility == Visibility.Visible) err.Visibility = Visibility.Collapsed;
+                    if (playlistUrl != null) ConfirmPlaylist(false);
+                    else if (err.Visibility == Visibility.Visible) err.Visibility = Visibility.Collapsed;
                     else if (page.Visibility == Visibility.Visible) ClosePage();
                 }
             };
@@ -719,14 +739,16 @@ namespace Downloader
             return true;
         }
 
-        static int RunTool(string args, int timeoutMs, Action<string> onLine)
+        static int RunTool(string args, int timeoutMs, Action<string> onLine) { return RunTool(Path.Combine(Bin, "yt-dlp.exe"), args, timeoutMs, onLine); }
+
+        static int RunTool(string exe, string args, int timeoutMs, Action<string> onLine, bool withErrors = false)
         {
             try
             {
-                using (var p = Run(Path.Combine(Bin, "yt-dlp.exe"), args))
+                using (var p = Run(exe, args))
                 {
                     p.OutputDataReceived += (s, e) => { if (e.Data != null) onLine(e.Data); };
-                    p.ErrorDataReceived += (s, e) => { };
+                    p.ErrorDataReceived += (s, e) => { if (withErrors && e.Data != null) onLine(e.Data); };
                     p.BeginOutputReadLine();
                     p.BeginErrorReadLine();
                     if (p.WaitForExit(timeoutMs))
@@ -889,6 +911,7 @@ namespace Downloader
                         catch (MusicError ex) { note = ex.Unsupported ? "Link não compatível" : "Não consegui ler no " + Music.Service(url); throw; }
                         target = list.Collection ? null : Music.SearchUrl(list.Tracks[0]);
                     }
+                    if (PhotoLink(url)) target = null;
                     if (target != null && !previewKilled)
                     {
                         var p = Run(Path.Combine(Bin, "yt-dlp.exe"), args + Args.Quote(target));
@@ -900,6 +923,12 @@ namespace Downloader
                         if (!p.WaitForExit(PreviewTimeoutMs)) { KillTree(p); p.WaitForExit(KillWaitMs); }
                         else p.WaitForExit();
                         if (list != null && data == null) note = "Não encontrei no " + Music.Via;
+                    }
+                    if (list == null && data == null && !previewKilled && (PhotoLink(url) || Errors.NoVideo(error)))
+                    {
+                        string photoError;
+                        data = PhotoPreview(url, out photoError);
+                        if (data == null && photoError != null) error = photoError;
                     }
                 }
                 catch (Exception ex) { error = ex.Message; }
@@ -980,8 +1009,8 @@ namespace Downloader
                 else
                 {
                     anyUnknown = true;
-                    p.SizeText = d.Note ?? (d.NeedsLogin ? "Exige login" : d.Live ? "Ao vivo" : d.Count > 0 ? d.Count + (d.Count == 1 ? " música" : " músicas")
-                        : d.Playlist ? "Vários vídeos" : "Tamanho desconhecido");
+                    p.SizeText = d.Note ?? (d.NeedsLogin ? "Exige login" : d.Live ? "Ao vivo" : d.Photos + d.Clips > 0 ? PhotoText(d) : d.Count > 0 ? d.Count + (d.Count == 1 ? " música" : " músicas")
+                        : d.Playlist ? "Playlist: você escolhe ao baixar" : "Tamanho desconhecido");
                 }
             }
 
@@ -1090,6 +1119,11 @@ namespace Downloader
             var active = new HashSet<string>(items.Where(i => (i.State == "fila" || i.State == "baixando") && i.TrimStart == start && i.TrimEnd == end).Select(i => VideoKey(i.Url)));
             foreach (var u in urls)
             {
+                if (IsPlaylist(u))
+                {
+                    if (u != playlistUrl && !pendingPlaylists.Contains(u)) pendingPlaylists.Enqueue(u);
+                    continue;
+                }
                 if (!active.Add(VideoKey(u))) { skipped++; continue; }
                 var it = new Item { Url = u, Title = u, Site = SiteName(u), Status = "Na fila", State = "fila", TrimStart = start, TrimEnd = end };
                 it.TrimExact = trimExactBox.IsChecked == true;
@@ -1112,6 +1146,111 @@ namespace Downloader
             }
             UpdateInputState();
             if (skipped > 0) SetHint(linkHint, skipped == 1 ? "Esse vídeo já está na fila." : skipped + " vídeos já estavam na fila.", true);
+            ShowNextPlaylist();
+            StartNext();
+        }
+
+        static bool IsPlaylist(string url)
+        {
+            if (Music.NeedsSearch(url)) return false;
+            if (Regex.IsMatch(url, @"^https?://(?:[\w-]+\.)?(?:youtube\.com|youtu\.be)/\S*[?&]list=[\w-]+", RegexOptions.IgnoreCase)) return true;
+            ProbeData d;
+            return probeCache.TryGetValue(PreviewKey(url), out d) && !d.Failed && d.Playlist && d.Count == 0;
+        }
+
+        static string SingleVideo(string url)
+        {
+            var m = Regex.Match(url, @"(?:[?&]v=|youtu\.be/)([\w-]{11})");
+            if (!m.Success) return null;
+            bool music = url.IndexOf("music.youtube.com", StringComparison.OrdinalIgnoreCase) >= 0;
+            return (music ? "https://music.youtube.com/watch?v=" : "https://www.youtube.com/watch?v=") + m.Groups[1].Value;
+        }
+
+        static void ShowNextPlaylist()
+        {
+            if (playlistUrl != null || pendingPlaylists.Count == 0) return;
+            string url = playlistUrl = pendingPlaylists.Dequeue();
+            playlistVideo = SingleVideo(url);
+            ((ListBox)win.FindName("PlaylistList")).ItemsSource = null;
+            ((TextBlock)win.FindName("PlaylistText")).Text = "Lendo os vídeos da playlist…";
+            ((RadioButton)win.FindName("PlaylistAll")).IsEnabled = true;
+            ((RadioButton)win.FindName(playlistVideo != null ? "PlaylistOne" : "PlaylistAll")).IsChecked = true;
+            ((Button)win.FindName("PlaylistOk")).IsEnabled = false;
+            ((FrameworkElement)win.FindName("PlaylistSheet")).Visibility = Visibility.Visible;
+            ThreadPool.QueueUserWorkItem(_ =>
+            {
+                var entries = new List<PlaylistEntry>();
+                string title = null;
+                for (int i = 0; updating && i < 900; i++) Thread.Sleep(100);
+                RunTool("--encoding utf-8 --flat-playlist --yes-playlist --ignore-errors --no-warnings --no-colors --playlist-end " + MaxPlaylist + " " +
+                    "--print \"ENTRY|%(url)s|%(duration|)s|%(title)s\" --print \"playlist:LIST|%(title)s\" " + Args.Quote(url), PlaylistTimeoutMs, line =>
+                {
+                    var c = line.Split(new[] { '|' }, 4);
+                    if (c[0] == "ENTRY" && c.Length == 4 && IsLink(c[1]))
+                        lock (entries) entries.Add(new PlaylistEntry { Url = c[1], Title = c[3], Time = Duration(c[2]).Replace("  ·  ", "") });
+                    else if (c[0] == "LIST" && line.Length > 5) title = line.Substring(5);
+                });
+                Ui(() => FillPlaylist(url, title, entries));
+            });
+        }
+
+        static void FillPlaylist(string url, string title, List<PlaylistEntry> entries)
+        {
+            if (url != playlistUrl) return;
+            var list = (ListBox)win.FindName("PlaylistList");
+            var text = (TextBlock)win.FindName("PlaylistText");
+            string key = playlistVideo == null ? null : VideoKey(playlistVideo);
+            var own = entries.FirstOrDefault(e => VideoKey(e.Url) == key);
+            if (own == null && key != null && entries.Count > 0)
+            {
+                ProbeData d;
+                string name = probeCache.TryGetValue(PreviewKey(url), out d) && !d.Failed && !string.IsNullOrEmpty(d.Title) && d.Title != "NA" ? d.Title : "Vídeo do link";
+                own = new PlaylistEntry { Url = playlistVideo, Title = name + " (vídeo do link, fora da playlist)", Time = "", FromLink = true };
+                entries.Insert(0, own);
+            }
+            list.ItemsSource = entries;
+            list.SelectedItem = own ?? entries.FirstOrDefault();
+            if (list.SelectedItem != null) list.ScrollIntoView(list.SelectedItem);
+            if (entries.Count == 0)
+            {
+                text.Text = playlistVideo != null ? "Não consegui ler a playlist. Dá para baixar só o vídeo do link." : "Não consegui ler esta playlist. Confira se ela é pública.";
+                ((RadioButton)win.FindName("PlaylistAll")).IsEnabled = false;
+                if (playlistVideo != null) ((RadioButton)win.FindName("PlaylistOne")).IsChecked = true;
+            }
+            int count = entries.Count(e => !e.FromLink);
+            if (entries.Count > 0) text.Text = "“" + (title ?? "Playlist") + "”, com " + count + (count == 1 ? " vídeo" : " vídeos") +
+                             (entries.Count >= MaxPlaylist ? ". O programa lê no máximo " + MaxPlaylist + "." : ".");
+            ((Button)win.FindName("PlaylistOk")).IsEnabled = entries.Count > 0 || playlistVideo != null;
+        }
+
+        static void ConfirmPlaylist(bool ok)
+        {
+            if (playlistUrl == null) return;
+            var list = (ListBox)win.FindName("PlaylistList");
+            var entries = list.ItemsSource as List<PlaylistEntry> ?? new List<PlaylistEntry>();
+            if (ok)
+            {
+                IEnumerable<PlaylistEntry> chosen;
+                if (((RadioButton)win.FindName("PlaylistAll")).IsChecked == true) chosen = entries.Where(e => !e.FromLink);
+                else
+                {
+                    var one = list.SelectedItem as PlaylistEntry;
+                    if (one == null && playlistVideo != null) one = new PlaylistEntry { Url = playlistVideo, Title = playlistVideo };
+                    chosen = one == null ? new PlaylistEntry[0] : new[] { one };
+                }
+                var active = new HashSet<string>(items.Where(i => i.State == "fila" || i.State == "baixando").Select(i => VideoKey(i.Url)));
+                foreach (var e in chosen)
+                {
+                    if (!active.Add(VideoKey(e.Url))) continue;
+                    var it = new Item { Url = e.Url, Title = e.Title, Site = SiteName(e.Url), Status = "Na fila", State = "fila" };
+                    it.CopyOptions(OptionsFor(e.Url));
+                    items.Add(it);
+                    queue.Enqueue(it);
+                }
+            }
+            playlistUrl = null;
+            HideSheet("PlaylistSheet");
+            ShowNextPlaylist();
             StartNext();
         }
 
@@ -1249,6 +1388,8 @@ namespace Downloader
             try { Directory.CreateDirectory(it.DestDir); } catch { }
             if (!Directory.Exists(it.DestDir)) { it.Preflight = Errors.DestUnavailable(it.DestDir); return -1; }
             if (it.Source == null && Music.NeedsSearch(it.Url) && !ResolveMusic(it)) return -1;
+            if (PhotoLink(it.Url)) it.Photos = true;
+            if (it.Photos) return RunPhotos(it);
 
             int code = -1;
             for (int attempt = 0; attempt < 2; attempt++)
@@ -1267,7 +1408,111 @@ namespace Downloader
                 string who = Errors.BrowserName(it.Login);
                 Ui(() => { it.Busy = true; it.Status = "Este conteúdo exige login. Usando " + (it.Login == "file" ? "o arquivo de cookies" : "o login do " + who) + "…"; });
             }
+            if (code != 0 && it.Preflight == null && !it.Cancelled && !it.Paused && Errors.NoVideo(it.LastError))
+            {
+                string videoError = it.LastError;
+                it.Photos = true;
+                code = RunPhotos(it);
+                if (code != 0 && it.Files.Count == 0 && !it.Cancelled && !it.Paused && Errors.Unsupported(it.LastError))
+                {
+                    it.Photos = false;
+                    it.LastError = videoError;
+                }
+            }
             return code;
+        }
+
+        static bool PhotoLink(string url)
+        {
+            return Regex.IsMatch(url ?? "", @"^https?://(?:www\.)?instagram\.com/(?:[\w.]+/)?p/[\w-]+", RegexOptions.IgnoreCase);
+        }
+
+        static int RunPhotos(Item it)
+        {
+            int code = -1;
+            for (int attempt = 0; attempt < 2; attempt++)
+            {
+                it.UseCookies = attempt == 1;
+                it.LastError = null;
+                if (it.UseCookies && it.Login == "file" && (cookieFile == null || !File.Exists(cookieFile)))
+                {
+                    it.LastError = "cookie file missing";
+                    return -1;
+                }
+                Ui(() => { it.Busy = true; it.Status = "Baixando fotos…"; });
+                code = PumpTool(it, Path.Combine(Bin, "gallery-dl.exe"), PhotoArgs(it), l => OnPhotoLine(it, l));
+                if (it.Files.Count > 0 && !it.Cancelled && !it.Paused) code = 0;
+                if (code == 0 || it.Cancelled || it.Paused) break;
+                if (attempt == 1 || it.Login == "none" || !Errors.NeedsLogin(it.LastError)) break;
+                string who = Errors.BrowserName(it.Login);
+                Ui(() => it.Status = "Este conteúdo exige login. Usando " + (it.Login == "file" ? "o arquivo de cookies" : "o login do " + who) + "…");
+            }
+            return code;
+        }
+
+        static string PhotoArgs(Item it)
+        {
+            var a = new StringBuilder("--config-ignore --no-colors --no-part ");
+            if (it.UseCookies)
+            {
+                if (it.Login == "file")
+                {
+                    string copy = Path.Combine(it.WorkDir, "cookies.txt");
+                    File.Copy(cookieFile, copy, true);
+                    a.Append("--cookies " + Args.Quote(copy) + " ");
+                }
+                else if (it.Login != "none") a.Append("--cookies-from-browser " + it.Login + " ");
+            }
+            if (it.Force) a.Append("--no-skip ");
+            a.Append("-D . " + Args.Quote(it.Url));
+            return a.ToString();
+        }
+
+        static void OnPhotoLine(Item it, string line)
+        {
+            if (string.IsNullOrWhiteSpace(line)) return;
+            if (line.StartsWith("["))
+            {
+                it.Tail.Enqueue(line);
+                while (it.Tail.Count > 40) it.Tail.Dequeue();
+                var m = Regex.Match(line, @"^\[[^\]]+\]\[error\] (.+)$");
+                if (m.Success) it.LastError = m.Groups[1].Value.Trim();
+                return;
+            }
+            bool skipped = line.StartsWith("# ");
+            string path;
+            try { path = Path.GetFullPath(Path.Combine(it.DestDir ?? Dest, (skipped ? line.Substring(2) : line).Trim())); }
+            catch { return; }
+            if (!File.Exists(path) || it.Files.Contains(path)) return;
+            it.Files.Add(path);
+            if (skipped) it.AlreadyThere = true;
+            it.Status = "Baixando fotos  ·  " + it.Files.Count + (it.Files.Count == 1 ? " arquivo salvo" : " arquivos salvos");
+        }
+
+        static ProbeData PhotoPreview(string url, out string error)
+        {
+            int photos = 0, clips = 0;
+            string first = null, err = null;
+            RunTool(Path.Combine(Bin, "gallery-dl.exe"), "--config-ignore --no-colors -g " + Args.Quote(url), PreviewTimeoutMs, line =>
+            {
+                var m = Regex.Match(line, @"^\[[^\]]+\]\[error\] (.+)$");
+                if (m.Success) { err = m.Groups[1].Value.Trim(); return; }
+                if (!line.StartsWith("http")) return;
+                bool clip = Regex.IsMatch(line, @"\.(mp4|m3u8|webm|mov)(\?|$)", RegexOptions.IgnoreCase) || line.Contains("video.");
+                if (clip) clips++;
+                else { photos++; if (first == null) first = line.Trim(); }
+            }, true);
+            error = err;
+            if (photos + clips == 0) return null;
+            return new ProbeData { Photos = photos, Clips = clips, Thumb = first, Site = SiteName(url) };
+        }
+
+        static string PhotoText(ProbeData d)
+        {
+            var parts = new List<string>();
+            if (d.Photos > 0) parts.Add(d.Photos + (d.Photos == 1 ? " foto" : " fotos"));
+            if (d.Clips > 0) parts.Add(d.Clips + (d.Clips == 1 ? " vídeo" : " vídeos"));
+            return string.Join(" e ", parts);
         }
 
         static bool ResolveMusic(Item it)
@@ -1355,13 +1600,15 @@ namespace Downloader
             return code;
         }
 
-        static int Pump(Item it, string args)
+        static int Pump(Item it, string args) { return PumpTool(it, Path.Combine(Bin, "yt-dlp.exe"), args, l => OnLine(it, l)); }
+
+        static int PumpTool(Item it, string exe, string args, Action<string> onLine)
         {
-            var p = Run(Path.Combine(Bin, "yt-dlp.exe"), args, it.DestDir);
+            var p = Run(exe, args, it.DestDir);
             it.Proc = p;
             if (it.Cancelled || it.Paused) KillTree(p);
-            p.OutputDataReceived += (s, e) => { if (e.Data != null) { var l = e.Data; Ui(() => OnLine(it, l)); } };
-            p.ErrorDataReceived += (s, e) => { if (e.Data != null) { var l = e.Data; Ui(() => OnLine(it, l)); } };
+            p.OutputDataReceived += (s, e) => { if (e.Data != null) { var l = e.Data; Ui(() => onLine(l)); } };
+            p.ErrorDataReceived += (s, e) => { if (e.Data != null) { var l = e.Data; Ui(() => onLine(l)); } };
             p.BeginOutputReadLine();
             p.BeginErrorReadLine();
             p.WaitForExit();
@@ -1657,7 +1904,7 @@ namespace Downloader
 
         static bool NameTakenByOther(Item it)
         {
-            if (!it.AlreadyThere || it.UseId || it.Force) return false;
+            if (!it.AlreadyThere || it.UseId || it.Force || it.Photos) return false;
             string key = VideoKey(it.Url);
             return !history.Any(h => VideoKey(h.Url) == key && h.Files.Intersect(it.Files, StringComparer.OrdinalIgnoreCase).Any());
         }
@@ -1983,6 +2230,7 @@ namespace Downloader
         {
             emptyHint.Visibility = items.Count == 0 && suggestions.Count == 0 && previews.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             suggestPanel.Visibility = suggestions.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            ((FrameworkElement)win.FindName("SuggestShow")).Visibility = suggestOff && history.Any(h => IsLink(h.ChannelUrl)) ? Visibility.Visible : Visibility.Collapsed;
             libEmpty.Text = history.Count == 0 ? "Nada na biblioteca ainda. Tudo que você baixar aparece aqui." : "Nada encontrado.";
             libEmpty.Visibility = libView.IsEmpty ? Visibility.Visible : Visibility.Collapsed;
         }
@@ -2222,7 +2470,7 @@ namespace Downloader
                              .OrderByDescending(g => g.Count()).ThenByDescending(g => g.Max(h => h.Date))
                              .Select(g => g.First()).ToList();
             var chosen = top.Where(h => h.ChannelUrl == firstChannel).Concat(top).Distinct().Take(3).ToList();
-            if (chosen.Count == 0) return;
+            if (chosen.Count == 0 || suggestOff) return;
             string key = string.Join(" ", chosen.Select(h => h.ChannelUrl));
             if (suggestBusy || key == suggestKey) return;
             suggestBusy = true;
@@ -2246,8 +2494,9 @@ namespace Downloader
                 {
                     suggestBusy = false;
                     suggestKey = key;
-                    var have = new HashSet<string>(history.Select(h => VideoKey(h.Url)).Concat(items.Select(i => VideoKey(i.Url))));
                     suggestions.Clear();
+                    if (suggestOff) return;
+                    var have = new HashSet<string>(history.Select(h => VideoKey(h.Url)).Concat(items.Select(i => VideoKey(i.Url))).Concat(suggestGone));
                     for (int i = 0; suggestions.Count < 8 && lists.Any(l => i < l.Count); i++)
                         foreach (var l in lists)
                             if (i < l.Count && suggestions.Count < 8 && have.Add(VideoKey(l[i].Url)))
@@ -2264,9 +2513,16 @@ namespace Downloader
         static void OnSuggestionButton(Suggestion sg, string tag)
         {
             if (tag == "s:open") OpenLink(sg.Url);
+            else if (tag == "s:remove")
+            {
+                suggestGone.Add(VideoKey(sg.Url));
+                suggestions.Remove(sg);
+            }
             else if (tag == "s:get" && !sg.Queued)
             {
                 sg.Queued = true;
+                suggestGone.Add(VideoKey(sg.Url));
+                suggestions.Remove(sg);
                 var it = new Item { Url = sg.Url, Title = sg.Title, Site = SiteName(sg.Url), Thumb = sg.Thumb, ThumbUrl = sg.ThumbUrl, Status = "Na fila", State = "fila" };
                 it.CopyOptions(defaults);
                 items.Add(it);
@@ -2525,6 +2781,7 @@ namespace Downloader
                 if (cfg.TryGetValue("afmt", out v) && Options.Has(Options.AudioFmts, v)) defaults.AudioFmt = v;
                 if (cfg.TryGetValue("dest", out v) && v.Length > 0) customDest = v;
                 if (cfg.TryGetValue("browser", out v)) linkBrowser = v;
+                suggestOff = cfg.TryGetValue("suggest", out v) && v == "0";
                 if (cfg.TryGetValue("theme", out v) && (v == "light" || v == "dark" || v == "system")) themeMode = v;
                 if (cfg.TryGetValue("width", out v)) double.TryParse(v, NumberStyles.Float, CultureInfo.InvariantCulture, out savedWidth);
                 if (cfg.TryGetValue("height", out v)) double.TryParse(v, NumberStyles.Float, CultureInfo.InvariantCulture, out savedHeight);
@@ -2544,6 +2801,7 @@ namespace Downloader
                     "dest=" + (customDest ?? ""),
                     "cookies=" + (cookieFile ?? ""),
                     "browser=" + linkBrowser,
+                    "suggest=" + (suggestOff ? "0" : "1"),
                     "seen=" + (seenVersion ?? ""),
                     "theme=" + themeMode,
                     "width=" + savedWidth.ToString(CultureInfo.InvariantCulture),

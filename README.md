@@ -18,6 +18,7 @@ O programa ainda não tem assinatura digital, então o Windows pode mostrar "O W
 - **Tamanho antes de baixar:** com título, miniatura e duração, sempre que o site informa.
 - **Só um trecho:** baixa apenas o intervalo escolhido, com corte exato ou rápido.
 - **Fila:** vários links de uma vez, com pausa, retomada e cancelamento.
+- **Playlists:** você escolhe entre a playlist inteira ou só um vídeo dela.
 - **Biblioteca:** o que você baixou neste PC, com busca e opção de baixar de novo.
 - **Músicas:** álbuns e playlists entram na fila com uma linha por música, em MP3 com artista e título.
 - **Conteúdo restrito:** usa o login do Firefox, Chrome, Edge, Brave, Opera ou Vivaldi, ou um arquivo de cookies, e só se o site pedir.
@@ -30,6 +31,7 @@ O programa ainda não tem assinatura digital, então o Windows pode mostrar "O W
 | Origem | Sites | De onde vem o arquivo |
 |---|---|---|
 | Vídeos | YouTube, TikTok, Instagram, X e Facebook | Do próprio site |
+| Fotos | X, Instagram (com carrosséis) e outros sites de imagens | Do próprio site |
 | Músicas | YouTube Music e SoundCloud | Do próprio site |
 | Músicas | Spotify, Deezer e Apple Music | Do YouTube Music |
 
@@ -58,6 +60,7 @@ Feito em C# 5 e WPF sobre o .NET Framework 4.8, compilado com o `csc` do própri
 | `yt-dlp.exe` | [yt-dlp](https://github.com/yt-dlp/yt-dlp/releases) |
 | `ffmpeg.exe` e `ffmpeg-LICENSE.txt` (cópia do `LICENSE.txt`) | Variante `win64-lgpl` do [FFmpeg-Builds](https://github.com/BtbN/FFmpeg-Builds/releases) |
 | `deno.exe` | [Deno](https://github.com/denoland/deno/releases) |
+| `gallery-dl.exe` e `gallery-dl-LICENSE.txt` (cópia do `LICENSE`) | [gallery-dl](https://codeberg.org/mikf/gallery-dl/releases) |
 
 **2. Compile:**
 

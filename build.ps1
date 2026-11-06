@@ -1,4 +1,4 @@
-param([string]$Version = '1.7.0',[string]$ReportUrl = '', [string]$SupportContact = 'contato.resoup@gmail.com')
+param([string]$Version = '1.8.0',[string]$ReportUrl = '', [string]$SupportContact = 'contato.resoup@gmail.com')
 $ErrorActionPreference = 'Stop'
 
 $Product = 'Downloader'
@@ -15,7 +15,7 @@ New-Item -ItemType Directory -Force "$obj\bin", $rel | Out-Null
 function Sha([string]$f) { (Get-FileHash -LiteralPath $f -Algorithm SHA256).Hash }
 
 $payload = @()
-foreach ($name in 'yt-dlp.exe', 'ffmpeg.exe', 'deno.exe') {
+foreach ($name in 'yt-dlp.exe', 'ffmpeg.exe', 'deno.exe', 'gallery-dl.exe') {
     $src = "$root\deps\$name"
     if (-not (Test-Path $src)) { throw "Falta deps\$name" }
     $hash = Sha $src
@@ -34,9 +34,12 @@ foreach ($name in 'yt-dlp.exe', 'ffmpeg.exe', 'deno.exe') {
 $ytv = (& "$root\deps\yt-dlp.exe" --version).Trim()
 $ffv = ((& "$root\deps\ffmpeg.exe" -hide_banner -version | Select-Object -First 1) -replace '^ffmpeg version (\S+).*', '$1')
 $dnv = ((& "$root\deps\deno.exe" --version | Select-Object -First 1) -replace '^deno (\S+).*', '$1')
+$gdv = ((& "$root\deps\gallery-dl.exe" --version) | Select-Object -First 1).Trim()
 $notices = (Get-Content "$root\THIRD-PARTY-NOTICES.txt" -Raw -Encoding UTF8).
-    Replace('{{YTDLP_VERSION}}', $ytv).Replace('{{FFMPEG_VERSION}}', $ffv).Replace('{{DENO_VERSION}}', $dnv) +
-    (Get-Content "$root\deps\ffmpeg-LICENSE.txt" -Raw)
+    Replace('{{YTDLP_VERSION}}', $ytv).Replace('{{FFMPEG_VERSION}}', $ffv).Replace('{{DENO_VERSION}}', $dnv).Replace('{{GALLERYDL_VERSION}}', $gdv) +
+    (Get-Content "$root\deps\ffmpeg-LICENSE.txt" -Raw) +
+    "`r`n-------------------------------------------------------------------------------`r`ngallery-dl - GNU GENERAL PUBLIC LICENSE v2`r`n-------------------------------------------------------------------------------`r`n" +
+    (Get-Content "$root\deps\gallery-dl-LICENSE.txt" -Raw)
 [IO.File]::WriteAllText("$obj\THIRD-PARTY-NOTICES.txt", $notices, (New-Object Text.UTF8Encoding $true))
 
 $rows = ($payload | ForEach-Object { "            new[] { `"$($_[0])`", `"$($_[1])`", `"$($_[2])`" }" }) -join ",`r`n"

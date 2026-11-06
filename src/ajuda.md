@@ -5,6 +5,7 @@
 3. Escolha as opções, se quiser. As que já vêm marcadas servem para a maioria dos casos. Passe o mouse sobre um botão ou ícone para ver o que ele faz.
 4. Clique em **Baixar** ou aperte **Ctrl+Enter**.
 Para baixar vários vídeos de uma vez, cole um link por linha. Eles entram em uma fila e baixam um de cada vez.
+Se o link for de uma playlist, o programa pergunta se você quer a playlist inteira ou só um vídeo, escolhido na lista. Em links de um vídeo dentro de uma playlist, esse vídeo já vem marcado.
 
 ## O que cada opção faz | Os botões abaixo da caixa de links
 - **Tipo:** vídeo com som, vídeo e áudio em dois arquivos separados, ou só o áudio.
@@ -37,6 +38,10 @@ O trecho vale para um link por vez e não funciona em transmissão ao vivo. Ao p
 **Vídeos, baixados do próprio site:**
 - **YouTube:** vídeos, Shorts e transmissões.
 - **TikTok, Instagram, X (Twitter) e Facebook:** publicações com vídeo.
+**Fotos, baixadas do próprio site:**
+- **X (Twitter):** fotos de publicações públicas.
+- **Instagram:** fotos e carrosséis completos. O Instagram quase sempre exige login: veja “Conteúdo restrito e login”.
+- **Outros sites de imagens:** quando um link não tem vídeo, o programa procura fotos nele.
 **Músicas, baixadas do próprio site:**
 - **YouTube Music:** músicas e clipes.
 - **SoundCloud:** faixas públicas.
@@ -98,6 +103,7 @@ O menu do cadeado mostra só os navegadores instalados neste PC e marca os que e
 - **Cancelar (✕):** para o download e apaga os arquivos temporários. A linha fica como “Cancelado”, e dá para baixar de novo.
 - **Tentar de novo:** aparece quando há erro. Se o download parou no meio, continua de onde estava, quando o site permite.
 - **Biblioteca:** guarda tudo que você baixou neste PC, com opções de abrir, mostrar na pasta e baixar de novo sem colar o link.
+- **Sugestões:** vídeos recentes dos canais que você mais baixa. **Remover** tira uma sugestão, e **Ocultar sugestões** desliga todas. Para trazê-las de volta, use **Mostrar sugestões** na tela inicial.
 
 ## Quando algo dá errado | Códigos de erro e relatórios
 Cada erro mostra o que aconteceu, o que fazer e um código, como AUTH-102. Em **Detalhes** você vê a possível causa e o relatório, e pode copiar ou salvar para enviar ao suporte.

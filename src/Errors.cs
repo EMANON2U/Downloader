@@ -73,6 +73,14 @@ namespace Downloader
 
         static bool Has(string text, params string[] parts) { return parts.Any(p => text.Contains(p)); }
 
+        public static bool NoVideo(string raw)
+        {
+            string e = (raw ?? "").ToLowerInvariant();
+            return Has(e, "no video", "there is no video", "no media", "unsupported url");
+        }
+
+        public static bool Unsupported(string raw) { return (raw ?? "").ToLowerInvariant().Contains("unsupported url"); }
+
         public static bool NeedsLogin(string raw)
         {
             if (string.IsNullOrEmpty(raw)) return false;

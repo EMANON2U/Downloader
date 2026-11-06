@@ -94,6 +94,7 @@ O Downloader é desenvolvido e publicado por **ArchiveByLOPES**. Os componentes 
 - **yt-dlp:** The Unlicense (domínio público). Faz a comunicação com os sites e o download.
 - **FFmpeg:** GNU LGPL v3, em build da variante LGPL. Junta, converte e corta os arquivos.
 - **Deno:** licença MIT. Executa os scripts que alguns sites exigem.
+- **gallery-dl:** GNU GPL v2. Baixa fotos e carrosséis. O código-fonte pode ser pedido pelo contato abaixo.
 O texto completo fica em **Licenças**, no topo desta página.
 ### Marcas
 Os nomes de sites e plataformas citados nesta área e na Ajuda pertencem aos seus titulares. O Downloader não é afiliado, patrocinado nem aprovado por eles.

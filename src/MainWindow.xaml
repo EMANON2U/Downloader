@@ -922,7 +922,11 @@
                 <TextBlock Text="{Binding Title}" ToolTip="{Binding Title}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"
                            TextTrimming="CharacterEllipsis" Height="36" Margin="0,8,0,0"/>
                 <TextBlock Text="{Binding Info}" FontSize="12" Foreground="{DynamicResource Muted}" TextTrimming="CharacterEllipsis" Margin="0,2,0,8"/>
-                <Button x:Name="GetBtn" Style="{StaticResource Pill}" Tag="s:get" Content="Baixar" HorizontalAlignment="Left"/>
+                <DockPanel>
+                    <Button Style="{StaticResource Link}" Tag="s:remove" Content="Remover" FontSize="12" DockPanel.Dock="Right" VerticalAlignment="Center"
+                            ToolTip="Tirar esta sugestão" AutomationProperties.Name="Remover sugestão"/>
+                    <Button x:Name="GetBtn" Style="{StaticResource Pill}" Tag="s:get" Content="Baixar" HorizontalAlignment="Left"/>
+                </DockPanel>
             </StackPanel>
             <DataTemplate.Triggers>
                 <DataTrigger Binding="{Binding Queued}" Value="True">
@@ -1168,13 +1172,18 @@
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
                             <Button x:Name="SitesBtn" Style="{StaticResource Link}" Content="Sites compatíveis" Margin="0,0,18,0"/>
                             <Button x:Name="EmptyHelpBtn" Style="{StaticResource Link}" Content="Como copiar o link?"/>
+                            <Button x:Name="SuggestShow" Style="{StaticResource Link}" Content="Mostrar sugestões" Margin="18,0,0,0" Visibility="Collapsed"/>
                         </StackPanel>
                     </StackPanel>
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Margin="0,0,10,0">
                             <ItemsControl x:Name="ItemsList" ItemTemplate="{StaticResource ItemCard}"/>
                             <StackPanel x:Name="SuggestPanel" Visibility="Collapsed" Margin="0,22,0,0">
-                                <TextBlock x:Name="SuggestTitle" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                                <DockPanel Margin="0,0,16,12">
+                                    <Button x:Name="SuggestHide" Style="{StaticResource Link}" Content="Ocultar sugestões" FontSize="12" DockPanel.Dock="Right" VerticalAlignment="Center"
+                                            ToolTip="Não mostrar mais sugestões de vídeos"/>
+                                    <TextBlock x:Name="SuggestTitle" FontSize="17" FontWeight="SemiBold"/>
+                                </DockPanel>
                                 <ItemsControl x:Name="SuggestList" ItemTemplate="{StaticResource SuggestCard}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
@@ -1277,6 +1286,32 @@
                     <Grid Margin="0,20,0,0">
                         <Button x:Name="FirstRunPick" Style="{StaticResource Link}" Content="Escolher outra pasta…" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         <Button x:Name="FirstRunOk" Style="{StaticResource PrimaryBtn}" Content="Continuar" HorizontalAlignment="Right"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Grid x:Name="PlaylistSheet" Background="{DynamicResource Scrim}" Visibility="Collapsed">
+            <Border Style="{StaticResource Sheet}" Width="540">
+                <StackPanel>
+                    <TextBlock Text="Este link é de uma playlist" FontFamily="Segoe UI Variable Display, Segoe UI" FontSize="20" FontWeight="SemiBold"/>
+                    <TextBlock x:Name="PlaylistText" FontSize="13" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                    <RadioButton x:Name="PlaylistAll" GroupName="Playlist" FontSize="14" Foreground="{DynamicResource Text}" Margin="0,18,0,0" Content="Baixar a playlist inteira"/>
+                    <RadioButton x:Name="PlaylistOne" GroupName="Playlist" FontSize="14" Foreground="{DynamicResource Text}" Margin="0,10,0,0" Content="Baixar só um vídeo, escolhido na lista"/>
+                    <ListBox x:Name="PlaylistList" Height="230" Margin="0,10,0,0" Background="{DynamicResource FieldBg}" Foreground="{DynamicResource Text}"
+                             BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" AutomationProperties.Name="Vídeos da playlist">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel Margin="4,5">
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding Time}" FontSize="12" Foreground="{DynamicResource Muted}" Margin="10,0,0,0"/>
+                                    <TextBlock Text="{Binding Title}" FontSize="13" TextTrimming="CharacterEllipsis"/>
+                                </DockPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <Grid Margin="0,22,0,0">
+                        <Button x:Name="PlaylistCancel" Style="{StaticResource Link}" Content="Cancelar" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        <Button x:Name="PlaylistOk" Style="{StaticResource PrimaryBtn}" Content="Baixar" HorizontalAlignment="Right"/>
                     </Grid>
                 </StackPanel>
             </Border>
