@@ -1161,7 +1161,7 @@
                 </StackPanel>
 
                 <Grid x:Name="DownloadsView" Grid.Row="2" Margin="0,8,0,0">
-                    <StackPanel x:Name="EmptyHint" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <StackPanel x:Name="EmptyHint" Panel.ZIndex="1" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Path Style="{StaticResource Ic}" Data="{StaticResource IcDownload}" Stroke="{DynamicResource Faint}" HorizontalAlignment="Center">
                             <Path.LayoutTransform><ScaleTransform ScaleX="1.7" ScaleY="1.7"/></Path.LayoutTransform>
                         </Path>

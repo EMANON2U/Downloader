@@ -1,3 +1,7 @@
+## 1.8.1 | 2026-11-05
+### Correções
+- Os links da tela inicial (Sites compatíveis, Como copiar o link e Mostrar sugestões) voltaram a responder ao clique.
+
 ## 1.8.0 | 2026-11-05
 ### Novidades
 - Fotos do X (Twitter), do Instagram e de outros sites, incluindo carrosséis do Instagram com todas as imagens e vídeos.
